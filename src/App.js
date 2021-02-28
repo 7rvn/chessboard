@@ -51,7 +51,7 @@ function Board() {
     { square: "55", value: null },
     { square: "56", value: null },
     { square: "57", value: null },
-    { square: "60", value: null },
+    { square: "60", value: "bp" },
     { square: "61", value: "bp" },
     { square: "62", value: "bp" },
     { square: "63", value: "bp" },
@@ -70,22 +70,24 @@ function Board() {
   ];
   const [boardState, setBoardState] = React.useState(defaultBoard);
   return (
-    <div className="board" id="board-board">
-      {boardState
-        .filter(function (item) {
-          return item.value != null;
-        })
-        .map((square) => {
-          return (
-            <Piece
-              type={square.value}
-              square={square.square}
-              key={square.square}
-            />
-          );
-        })}
+    <div className="board-layot" style={{ width: "500px", height: "500px" }}>
+      <div className="board" id="board-board">
+        {boardState
+          .filter(function (item) {
+            return item.value != null;
+          })
+          .map((square) => {
+            return (
+              <Piece
+                type={square.value}
+                square={square.square}
+                key={square.square}
+              />
+            );
+          })}
 
-      {/* <Highlight color="red" square="3" /> */}
+        {/* <Highlight color="red" square="3" /> */}
+      </div>
     </div>
   );
 }
