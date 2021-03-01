@@ -60,6 +60,7 @@
 .highlight {
   /* background-color: rgb(235, 97, 80); */
   opacity: 0.8;
+  z-index: 2;
 }
 
 .hint {
@@ -114,6 +115,12 @@
 
 .bq {
   background-image: url("../src/pieces/bq.png");
+}
+
+.square-,
+.square-undefined {
+  display: none;
+  visibility: hidden;
 }
 
 .square-00 {
