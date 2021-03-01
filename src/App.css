@@ -46,11 +46,20 @@
 }
 
 .piece {
+  cursor: grab;
+  background-size: 100%;
+  z-index: 3;
+}
+
+.square {
   width: 12.5%;
   height: 12.5%;
   position: absolute;
-  cursor: grab;
-  background-size: 100%;
+}
+
+.highlight {
+  background-color: rgb(235, 97, 80);
+  opacity: 0.8;
 }
 
 .wp {

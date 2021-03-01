@@ -2,6 +2,24 @@ import * as React from "react";
 import "./App.css";
 
 function Board() {
+  function clickSquare(e, square, type) {
+    e.preventDefault();
+    //console.log(e);
+    if (e.button === 2) {
+      const copyHighlights = [...highlights];
+      const index = copyHighlights.indexOf(square);
+      console.log("before", copyHighlights);
+      console.log(index);
+      if (index > -1) {
+        copyHighlights.splice(index, 1);
+      } else {
+        copyHighlights.push(square);
+      }
+      setHighlights(copyHighlights);
+      console.log("after", copyHighlights);
+    }
+  }
+
   const defaultBoard = [
     { square: "00", value: "wr" },
     { square: "01", value: "wn" },
@@ -69,6 +87,9 @@ function Board() {
     { square: "77", value: "br" },
   ];
   const [boardState, setBoardState] = React.useState(defaultBoard);
+  const [highlights, setHighlights] = React.useState([]);
+  const [activePiece, setActivePiece] = React.useState("");
+
   return (
     <div className="board-layot" style={{ width: "500px", height: "500px" }}>
       <div className="board" id="board-board">
@@ -78,7 +99,7 @@ function Board() {
           })
           .map((square) => {
             return (
-              <Piece
+              <Square
                 type={square.value}
                 square={square.square}
                 key={square.square}
@@ -86,23 +107,44 @@ function Board() {
             );
           })}
 
-        {/* <Highlight color="red" square="3" /> */}
+        {boardState
+          .filter(function (item) {
+            return item.value == null;
+          })
+          .map((square) => {
+            return (
+              <Square
+                type={square.value}
+                square={square.square}
+                key={square.square}
+              />
+            );
+          })}
+
+        {highlights.map((square) => {
+          return <Highlight square={square} key={square} />;
+        })}
       </div>
     </div>
   );
+
+  function Square({ type, square, onclick }) {
+    if (type) {
+      return (
+        <div
+          className={`piece ${type} square square-${square}`}
+          onClick={(e) => clickSquare(e, square, type)}
+          onContextMenu={(e) => clickSquare(e, square, type)}
+        />
+      );
+    } else {
+      return <div className={`square square-${square}`} />;
+    }
+  }
 }
 
-function Piece({ type, square }) {
-  return <div className={`piece ${type} square-${square}`} />;
-}
-
-function Highlight({ color, square }) {
-  return (
-    <div
-      className={`highlight square-${square}`}
-      style={{ backgroundcolor: color }}
-    />
-  );
+function Highlight({ square }) {
+  return <div className={`highlight square square-${square}`} />;
 }
 
 function App() {
