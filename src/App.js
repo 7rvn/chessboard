@@ -2,21 +2,40 @@ import * as React from "react";
 import "./App.css";
 
 function Board() {
+  function highlightActivePiece() {
+    if (!activePiece) {
+      return;
+    }
+    return (
+      <Highlight square={activePiece} key={activePiece} color={"yellow"} />
+    );
+  }
+
   function clickSquare(e, square, type) {
     e.preventDefault();
     //console.log(e);
     if (e.button === 2) {
+      setActivePiece("");
+      setLegalMoves([]);
       const copyHighlights = [...highlights];
       const index = copyHighlights.indexOf(square);
-      console.log("before", copyHighlights);
-      console.log(index);
+
       if (index > -1) {
         copyHighlights.splice(index, 1);
       } else {
         copyHighlights.push(square);
       }
       setHighlights(copyHighlights);
-      console.log("after", copyHighlights);
+    } else {
+      setHighlights([]);
+      if (activePiece === square) {
+        setLegalMoves([]);
+        setActivePiece();
+      } else {
+        setActivePiece(square);
+        const moves = ["24", "34"];
+        setLegalMoves(moves);
+      }
     }
   }
 
@@ -89,6 +108,7 @@ function Board() {
   const [boardState, setBoardState] = React.useState(defaultBoard);
   const [highlights, setHighlights] = React.useState([]);
   const [activePiece, setActivePiece] = React.useState("");
+  const [legalMoves, setLegalMoves] = React.useState([]);
 
   return (
     <div className="board-layot" style={{ width: "500px", height: "500px" }}>
@@ -106,7 +126,6 @@ function Board() {
               />
             );
           })}
-
         {boardState
           .filter(function (item) {
             return item.value == null;
@@ -120,10 +139,13 @@ function Board() {
               />
             );
           })}
-
         {highlights.map((square) => {
-          return <Highlight square={square} key={square} />;
+          return <Highlight square={square} key={square} color={"red"} />;
         })}
+        {legalMoves.map((square) => {
+          return <Hint square={square} key={square} />;
+        })}
+        {highlightActivePiece()}
       </div>
     </div>
   );
@@ -143,8 +165,17 @@ function Board() {
   }
 }
 
-function Highlight({ square }) {
-  return <div className={`highlight square square-${square}`} />;
+function Highlight({ square, color }) {
+  return (
+    <div
+      className={`highlight square square-${square}`}
+      style={{ backgroundColor: color }}
+    />
+  );
+}
+
+function Hint({ square }) {
+  return <div className={`hint square square-${square}`} />;
 }
 
 function App() {
