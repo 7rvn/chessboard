@@ -3,6 +3,8 @@ import "./App.css";
 import Chess from "chess.js";
 
 import Board from "./components/Board";
+import NavBar from "./components/NavBar";
+
 import { algebraicToHex, hexToAlgebraic } from "./utils/helper";
 
 function App() {
@@ -71,14 +73,17 @@ function App() {
   }
 
   return (
-    <Board
-      position={board}
-      clickHandler={handleClick}
-      highlights={highlights}
-      legalMoves={legalMoves}
-      activePiece={activePiece}
-      lastMove={lastMove}
-    ></Board>
+    <div id="main">
+      <NavBar />
+      <Board
+        position={board}
+        clickHandler={handleClick}
+        highlights={highlights}
+        legalMoves={legalMoves}
+        activePiece={activePiece}
+        lastMove={lastMove}
+      ></Board>
+    </div>
   );
 }
 

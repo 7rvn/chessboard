@@ -37,12 +37,28 @@
   }
 }
 
+#main {
+  background-color: #312e2b;
+  display: flex;
+}
+
+.navbar {
+  width: 150px;
+  height: 100vh;
+  background-color: #272421;
+}
+
 #board-board {
   background-image: url("greenboard.png");
   width: 100%;
   height: 100%;
   background-size: 100%;
   position: relative;
+}
+
+.board-layout {
+  padding-left: 30px;
+  padding-top: 50px;
 }
 
 .piece {

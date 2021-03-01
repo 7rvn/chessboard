@@ -13,7 +13,7 @@ function Board({
   lastMove,
 }) {
   return (
-    <div className="board-layot" style={{ width: "500px", height: "500px" }}>
+    <div className="board-layout" style={{ width: "650px", height: "650px" }}>
       <div className="board" id="board-board">
         {position.map((rank, rankIndex) =>
           rank.map((file, fileIndex) => (
