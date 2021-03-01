@@ -1,7 +1,23 @@
 import * as React from "react";
 import "./App.css";
+import Chess from "chess.js";
 
 function Board() {
+  function squareToVerbose(square) {
+    return (
+      String.fromCharCode(97 + parseInt(square[1])) +
+      (parseInt(square[0]) + 1).toString()
+    );
+  }
+
+  function verboseToSquares(verboseList) {
+    return verboseList.map(
+      (x) => (parseInt(x[1]) - 1).toString() + (x.charCodeAt(0) - 97).toString()
+    );
+  }
+  const game = new Chess();
+  // console.log(game.moves({ square: squareToVerbose("41") }));
+  // console.log(squareToVerbose("41"));
   function highlightActivePiece() {
     if (!activePiece) {
       return;
@@ -13,7 +29,7 @@ function Board() {
 
   function clickSquare(e, square, type) {
     e.preventDefault();
-    //console.log(e);
+    // if left click highlight
     if (e.button === 2) {
       setActivePiece("");
       setLegalMoves([]);
@@ -28,13 +44,37 @@ function Board() {
       setHighlights(copyHighlights);
     } else {
       setHighlights([]);
+      // if clicked on active piece
       if (activePiece === square) {
         setLegalMoves([]);
-        setActivePiece();
+        setActivePiece("");
       } else {
-        setActivePiece(square);
-        const moves = ["24", "34"];
-        setLegalMoves(moves);
+        //console.log(square);
+        // if square a apice
+        if (type != null) {
+          setActivePiece(square);
+          const gosquare = squareToVerbose(square);
+          const moves = game.moves({ square: gosquare });
+          verboseToSquares(moves);
+          setLegalMoves(verboseToSquares(moves));
+        } else {
+          // if a piece is active
+
+          if (activePiece) {
+            const gosquare = squareToVerbose(square);
+            const activeSquare = squareToVerbose(activePiece);
+            const moves = game.moves({ square: activeSquare });
+            console.log(gosquare);
+            console.log(moves);
+            //if square legal mvoe
+            if (moves.includes(gosquare)) {
+              console.log("moooooove");
+            } else {
+              setLegalMoves([]);
+              setActivePiece("");
+            }
+          }
+        }
       }
     }
   }
@@ -133,9 +173,9 @@ function Board() {
           .map((square) => {
             return (
               <Square
-                type={square.value}
                 square={square.square}
                 key={square.square}
+                type={square.value}
               />
             );
           })}
@@ -151,17 +191,13 @@ function Board() {
   );
 
   function Square({ type, square, onclick }) {
-    if (type) {
-      return (
-        <div
-          className={`piece ${type} square square-${square}`}
-          onClick={(e) => clickSquare(e, square, type)}
-          onContextMenu={(e) => clickSquare(e, square, type)}
-        />
-      );
-    } else {
-      return <div className={`square square-${square}`} />;
-    }
+    return (
+      <div
+        className={`piece ${type} square square-${square}`}
+        onClick={(e) => clickSquare(e, square, type)}
+        onContextMenu={(e) => clickSquare(e, square, type)}
+      />
+    );
   }
 }
 
