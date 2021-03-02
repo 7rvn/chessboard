@@ -12,5 +12,5 @@ export function constructPgnTree() {
   const newnode7 = newnode6.addChild(new Node("Qf3"));
   const newnode8 = newnode7.addChild(new Node("Nxc3"));
 
-  return;
+  return root;
 }

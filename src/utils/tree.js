@@ -1,8 +1,11 @@
+import { algebraicToHex } from "./helper";
+
 export function Node(move) {
   this.move = move;
   this.nextMove = null;
   this.parent = null;
   this.sideLine = [];
+  this.hexMove = algebraicToHex([move]);
 
   this.setParentNode = function (node) {
     this.parent = node;

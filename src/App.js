@@ -17,6 +17,8 @@ function App() {
   const [activePiece, setActivePiece] = React.useState();
   const [lastMove, setLastMove] = React.useState([]);
   const [pgnTree, setPgnTree] = React.useState(constructPgnTree);
+  const [alertBox, setAlertBox] = React.useState("make a move");
+  const [currentNode, setCurrentNode] = React.useState(pgnTree);
 
   function handleClick(e) {
     e.preventDefault();
@@ -60,13 +62,21 @@ function App() {
       if (activePiece) {
         const moveFrom = hexToAlgebraic(activePiece);
         const moveTo = hexToAlgebraic(square);
+        const mainLineMove = currentNode.hexMove[0];
+        if (mainLineMove === square) {
+          setAlertBox("correct move");
+          // console.log("computer go:", pgnTree.nextMove.move);
+        } else {
+          return;
+        }
         const makeMove = game.move({ from: moveFrom, to: moveTo });
         if (makeMove) {
           setBoard(game.board());
           setLegalMoves([]);
           setLastMove([activePiece, square]);
           setActivePiece("");
-          setTimeout(() => makeComputerMove(), 1000);
+          setTimeout(() => makeComputerMove(currentNode.nextMove.move), 1000);
+          setCurrentNode(currentNode.nextMove.nextMove);
         } else {
           setLegalMoves([]);
           setActivePiece("");
@@ -75,17 +85,22 @@ function App() {
     }
   }
 
-  function makeComputerMove() {
-    console.log("pc move");
-    const moves = game.moves({ verbose: true });
-    const verboseMove = moves[Math.floor(Math.random() * moves.length)];
-    const algFrom = verboseMove.from;
-    const algTo = verboseMove.to;
-    const hexFrom = algebraicToHex([algFrom]);
-    const hexTo = algebraicToHex([algTo]);
-    game.move({ from: algFrom, to: algTo });
+  function makeComputerMove(move = null) {
+    console.log("pc move", move);
+    if (move) {
+      game.move(move);
+      //setLastMove([hexFrom, hexTo]);
+    } else {
+      const moves = game.moves({ verbose: true });
+      const verboseMove = moves[Math.floor(Math.random() * moves.length)];
+      const algFrom = verboseMove.from;
+      const algTo = verboseMove.to;
+      const hexFrom = algebraicToHex([algFrom]);
+      const hexTo = algebraicToHex([algTo]);
+      game.move({ from: algFrom, to: algTo });
+      setLastMove([hexFrom, hexTo]);
+    }
     setBoard(game.board());
-    setLastMove([hexFrom, hexTo]);
   }
 
   return (
@@ -99,6 +114,9 @@ function App() {
         activePiece={activePiece}
         lastMove={lastMove}
       ></Board>
+      <div className={"alertBox"} style={{ color: "white" }}>
+        {alertBox}
+      </div>
     </div>
   );
 }
