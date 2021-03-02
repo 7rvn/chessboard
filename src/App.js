@@ -64,12 +64,26 @@ function App() {
           setLegalMoves([]);
           setLastMove([activePiece, square]);
           setActivePiece("");
+          setTimeout(() => makeComputerMove(), 1000);
         } else {
           setLegalMoves([]);
           setActivePiece("");
         }
       }
     }
+  }
+
+  function makeComputerMove() {
+    console.log("pc move");
+    const moves = game.moves({ verbose: true });
+    const verboseMove = moves[Math.floor(Math.random() * moves.length)];
+    const algFrom = verboseMove.from;
+    const algTo = verboseMove.to;
+    const hexFrom = algebraicToHex([algFrom]);
+    const hexTo = algebraicToHex([algTo]);
+    game.move({ from: algFrom, to: algTo });
+    setBoard(game.board());
+    setLastMove([hexFrom, hexTo]);
   }
 
   return (
