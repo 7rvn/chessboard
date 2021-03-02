@@ -6,6 +6,7 @@ import Board from "./components/Board";
 import NavBar from "./components/NavBar";
 
 import { algebraicToHex, hexToAlgebraic } from "./utils/helper";
+import { constructPgnTree } from "./utils/pgnHelper";
 
 function App() {
   const [game, setGame] = React.useState(new Chess());
@@ -15,6 +16,7 @@ function App() {
   const [legalMoves, setLegalMoves] = React.useState([]);
   const [activePiece, setActivePiece] = React.useState();
   const [lastMove, setLastMove] = React.useState([]);
+  const [pgnTree, setPgnTree] = React.useState(constructPgnTree);
 
   function handleClick(e) {
     e.preventDefault();
