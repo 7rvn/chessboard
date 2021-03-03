@@ -14,7 +14,6 @@ export function Node(move) {
   this.addChild = function (node) {
     node.setParentNode(this);
     this.nextMove = node;
-    return node;
   };
 
   this.getParentNode = function () {
@@ -27,5 +26,10 @@ export function Node(move) {
 
   this.removeChildren = function () {
     this.children = [];
+  };
+
+  this.addSideline = function (node) {
+    node.setParentNode(this);
+    this.sideLine.push(node);
   };
 }
