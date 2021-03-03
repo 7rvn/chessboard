@@ -5,7 +5,7 @@ import Chess from "chess.js";
 import Board from "./components/Board";
 import NavBar from "./components/NavBar";
 
-import { algebraicToHex, hexToAlgebraic } from "./utils/helper";
+import { sanToHexTo, hexToAlgebraic, isLegal } from "./utils/helper";
 import { constructPgnTree } from "./utils/pgnHelper";
 
 function App() {
@@ -28,9 +28,11 @@ function App() {
 
     // if right click
     if (e.button === 2) {
-      // toggle highlight square
+      // deactive piece
       setActivePiece("");
       setLegalMoves([]);
+
+      // toggle highlight square
       const copyHighlights = [...highlights];
       const index = copyHighlights.indexOf(square);
 
@@ -43,44 +45,99 @@ function App() {
 
       // if left click
     } else {
+      // disable highlights
       setHighlights([]);
 
       // if square is piece
       if (isPiece) {
-        // if clicked on active piece, deactivate
+        // if clicked on active piece
         if (activePiece === square) {
+          // deactive piece
           setLegalMoves([]);
           setActivePiece("");
           return;
+
+          // if clicked on inactive piece
         } else {
+          // activate piece
           setActivePiece(square);
+
+          // highlight legal moves
           const algSquare = hexToAlgebraic(square);
-          const moves = game.moves({ square: algSquare });
-          setLegalMoves(algebraicToHex(moves));
+          const moves = game.moves({ square: algSquare, verbose: true });
+          const legalMovesHex = sanToHexTo(moves.map((x) => x.to));
+
+          setLegalMoves(legalMovesHex);
         }
       }
       if (activePiece) {
         const moveFrom = hexToAlgebraic(activePiece);
         const moveTo = hexToAlgebraic(square);
-        const mainLineMove = currentNode.hexMove[0];
-        if (mainLineMove === square) {
-          setAlertBox("correct move");
-          // console.log("computer go:", pgnTree.nextMove.move);
+        const mainLineMove = currentNode;
+        const moves = game.moves({ square: moveFrom, verbose: true });
+
+        // find san of move also checks if legal
+        const san = isLegal(moves, moveFrom, moveTo);
+
+        // if move is legal
+        if (san) {
+          // get recommended moves
+          console.log(san, " is legal, but is it good?");
+          const goodMoves = [currentNode.move];
+          if (currentNode.sideline) {
+            currentNode.sideline.forEach((element) => {
+              goodMoves.push(element.move);
+            });
+          }
+          console.log("good moves:", goodMoves);
+
+          // check if move is recommended
+          if (goodMoves.includes(san)) {
+            console.log("good do it");
+
+            game.move({ from: moveFrom, to: moveTo });
+            setBoard(game.board());
+            setLegalMoves([]);
+            setLastMove([activePiece, square]);
+            setActivePiece("");
+
+            setTimeout(() => makeComputerMove(currentNode.nextMove.move), 300);
+            setCurrentNode(currentNode.nextMove.nextMove);
+
+            // move legal but not recommended
+          } else {
+          }
+          // move illegal
         } else {
-          return;
         }
-        const makeMove = game.move({ from: moveFrom, to: moveTo });
-        if (makeMove) {
-          setBoard(game.board());
-          setLegalMoves([]);
-          setLastMove([activePiece, square]);
-          setActivePiece("");
-          setTimeout(() => makeComputerMove(currentNode.nextMove.move), 1000);
-          setCurrentNode(currentNode.nextMove.nextMove);
-        } else {
-          setLegalMoves([]);
-          setActivePiece("");
-        }
+
+        // console.log(
+        //   "currnet move:",
+        //   mainLineMove,
+        //   mainLineMove.to,
+        //   moveTo,
+        //   " : ",
+        //   mainLineMove.from,
+        //   moveFrom
+        // );
+        // if (mainLineMove.to === moveTo && mainLineMove.from === moveFrom) {
+        //   setAlertBox("correct move");
+        //   console.log("correct move");
+        // } else {
+        //   //return;
+        // }
+        // const makeMove = game.move({ from: moveFrom, to: moveTo });
+        // if (makeMove) {
+        //   setBoard(game.board());
+        //   setLegalMoves([]);
+        //   setLastMove([activePiece, square]);
+        //   setActivePiece("");
+        //   setTimeout(() => makeComputerMove(currentNode.nextMove.move), 300);
+        //   setCurrentNode(currentNode.nextMove.nextMove);
+        // } else {
+        //   setLegalMoves([]);
+        //   setActivePiece("");
+        // }
       }
     }
   }
@@ -95,8 +152,8 @@ function App() {
       const verboseMove = moves[Math.floor(Math.random() * moves.length)];
       const algFrom = verboseMove.from;
       const algTo = verboseMove.to;
-      const hexFrom = algebraicToHex([algFrom]);
-      const hexTo = algebraicToHex([algTo]);
+      const hexFrom = sanToHexTo([algFrom]);
+      const hexTo = sanToHexTo([algTo]);
       game.move({ from: algFrom, to: algTo });
       setLastMove([hexFrom, hexTo]);
     }

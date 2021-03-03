@@ -11,7 +11,7 @@ export function constructPgnTree() {
   // for each string starteing with n.
   pgn_processed.forEach((e) => {
     const letter = /[a-zA-Z]/;
-    console.log(e.split(" "));
+    //console.log(e.split(" "));
 
     // for each split by whitespace
     e.split(" ").map((s) => {
@@ -35,20 +35,20 @@ export function constructPgnTree() {
 
         if (!root) {
           root = newNode;
-          console.log("root add: ", move);
+          //console.log("root add: ", move);
         } else {
           if (!vFlag) {
             prevNode.addChild(newNode);
-            console.log("add to: ", prevNode.move, " : ", move);
+            //console.log("add to: ", prevNode.move, " : ", move);
           } else {
             roots[roots.length - 1].addSideline(newNode);
             vFlag = false;
-            console.log(
-              "add var: ",
-              move,
-              "to: ",
-              roots[roots.length - 1].move
-            );
+            // console.log(
+            //   "add var: ",
+            //   move,
+            //   "to: ",
+            //   roots[roots.length - 1].move
+            // );
           }
         }
         prevNode = newNode;
@@ -61,7 +61,7 @@ export function constructPgnTree() {
         vFlag = true;
 
         const debugroots = roots.map((r) => r.move);
-        console.log("car begin, lmm:", debugroots);
+        //console.log("car begin, lmm:", debugroots);
       }
       // add variation once set flag
 
@@ -70,8 +70,8 @@ export function constructPgnTree() {
       if (s.includes(")")) {
         prevNode = roots.pop();
 
-        const debugroots = roots.map((r) => r.move);
-        console.log("var over, lmm:", debugroots);
+        //const debugroots = roots.map((r) => r.move);
+        //console.log("var over, lmm:", debugroots);
       }
     });
   });
