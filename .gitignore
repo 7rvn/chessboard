@@ -21,3 +21,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+notes.txt
+src/App Kopie.js
+src/components/Board Kopie.js
+src/components/Square Kopie.js
+src/components/Square.js
