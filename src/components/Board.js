@@ -39,6 +39,12 @@ function Board({ position, clickHandler, move = null, markings }) {
     const newPosition = { ...positionObj };
     newPosition[from] = null;
     newPosition[to] = positionObj[from];
+    setAnimationSquares({
+      from: from,
+      fromPiece: positionObj[from],
+      to: to,
+      toPiece: positionObj[to],
+    });
     setLastMove([from, to]);
     setLastClick(null);
     return newPosition;
@@ -54,6 +60,8 @@ function Board({ position, clickHandler, move = null, markings }) {
 
   const [highlights, setHighlights] = React.useState([]);
   const [lastMove, setLastMove] = React.useState([]);
+
+  const [animationSquares, setAnimationSquares] = React.useState({});
 
   function boardClick({ rank, file, e }) {
     e.preventDefault();
@@ -77,7 +85,7 @@ function Board({ position, clickHandler, move = null, markings }) {
 
       // if last click is a piece and not the same square
       if (positionObj[lastClick] && lastClick !== square) {
-        //setAnimation(animateMove(lastClick, square));
+        setAnimation(animateMove(lastClick, square));
         setPositionObj(makeMove(lastClick, square));
       } else {
         setLastClick(square);
@@ -99,26 +107,33 @@ function Board({ position, clickHandler, move = null, markings }) {
             square: animation.square,
             count: animation.count + 1,
           });
-        }, 1);
+        }, 2);
         return () => clearInterval(interval);
       } else {
+        setAnimation();
+        setAnimationSquares();
       }
     }
-  });
+  }, [animation]);
 
   let squares = [];
   Object.entries(positionObj).forEach((entry) => {
-    const [square, piece] = entry;
+    let [square, piece] = entry;
 
     let style = null;
-    // if (animation) {
-    //   if (
-    //     Math.abs(rankIndex - 7) === parseInt(animation.square[0]) &&
-    //     fileIndex === parseInt(animation.square[1])
-    //   ) {
-    //     style = { transform: `translate(${animation.x}%, ${animation.y}%)` };
-    //   }
-    // }
+    if (animation) {
+      if (square === animation.square) {
+        style = {
+          transform: `translate(${animation.x}%, ${animation.y}%)`,
+        };
+      }
+      if (square === animationSquares.to) {
+        piece = null;
+      }
+      if (square === animationSquares.from) {
+        piece = animationSquares.fromPiece;
+      }
+    }
 
     squares.push(
       <Square
