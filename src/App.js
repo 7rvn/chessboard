@@ -9,29 +9,29 @@ import { sanToHexTo, hexToAlgebraic, isLegal, algToHex } from "./utils/helper";
 import { constructPgnTree } from "./utils/pgnHelper";
 
 function App() {
-  console.log("render appp");
+  console.log("render app");
   const [game, setGame] = React.useState(new Chess());
   const [board, setBoard] = React.useState(game.board());
 
-  const turn = game.turn();
+  const boardRef = React.useRef();
 
-  let move = null;
   let lastClick = null;
   function handleClick({ rank, file }) {
     lastClick = { file: file, rank: rank };
   }
 
   React.useEffect(() => {
-    if (move) {
-      game.move(move.san);
-      setBoard(game.board());
-    }
-  }, [move, game]);
+    setInterval(() => {
+      const move = game.moves({ verbose: true })[0];
+      game.move(move);
+      boardRef.current.makeDo(move);
+    }, 2000);
+  }, [boardRef, game]);
 
   return (
     <div id="main">
       <NavBar />
-      <Board position={board} clickHandler={handleClick} move={move}></Board>
+      <Board position={board} clickHandler={handleClick} ref={boardRef}></Board>
     </div>
   );
 }

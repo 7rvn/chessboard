@@ -2,6 +2,7 @@ import * as React from "react";
 
 import Square from "./Square";
 import Highlight from "./Highlight";
+import { algToHex } from "../utils/helper";
 
 function animateMove(moveFrom, moveTo) {
   console.log("executing:", moveFrom, moveTo);
@@ -34,7 +35,7 @@ function constructPositionObj(position) {
   return positionObj;
 }
 
-function Board({ position, clickHandler, move = null, markings }) {
+const Board = React.forwardRef(({ position, clickHandler, markings }, ref) => {
   function makeMove(from, to) {
     const newPosition = { ...positionObj };
     newPosition[from] = null;
@@ -49,6 +50,16 @@ function Board({ position, clickHandler, move = null, markings }) {
     setLastClick(null);
     return newPosition;
   }
+
+  React.useImperativeHandle(ref, () => ({
+    makeDo(prop) {
+      console.log("asbhljdaslhj", prop);
+      const from = algToHex(prop.from);
+      const to = algToHex(prop.to);
+      setPositionObj(makeMove(from, to));
+      setAnimation(animateMove(from, to));
+    },
+  }));
 
   console.log("render board");
 
@@ -176,6 +187,6 @@ function Board({ position, clickHandler, move = null, markings }) {
       </div>
     </div>
   );
-}
+});
 
 export default Board;
