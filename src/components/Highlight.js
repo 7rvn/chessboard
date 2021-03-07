@@ -1,12 +1,7 @@
 import * as React from "react";
 
-function Highlight({ square, color, clickHandler }) {
-  return (
-    <div
-      className={`highlight square square-${square}`}
-      style={{ backgroundColor: color }}
-    />
-  );
+function Highlight({ square, style, clickHandler }) {
+  return <div className={`highlight square square-${square}`} style={style} />;
 }
 
 export default Highlight;

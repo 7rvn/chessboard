@@ -22,7 +22,6 @@ function App() {
     console.log("active: ", activePiece, " last: ", lastClick);
     let san = hexToSan(rank, file);
 
-    // if clicked own piece
     let square = game.get(san);
 
     if (square) {
@@ -59,6 +58,7 @@ function App() {
             console.log("illegal move");
             activePiece = null;
             lastClick = null;
+            boardRef.current.highlightSquares([]);
           }
         }
       }
@@ -76,6 +76,7 @@ function App() {
           setGame(newGame);
           return true;
         } else {
+          boardRef.current.highlightSquares([]);
           console.log("illegal move");
           activePiece = null;
           lastClick = null;

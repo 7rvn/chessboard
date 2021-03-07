@@ -113,8 +113,12 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
       if (highlights.length) {
         setHighlights([]);
       }
-      if (activePiece !== rank + file) {
-        setActivePiece([rank + file]);
+      if (activePiece[0] !== rank + file) {
+        if (positionObj[rank + file]) {
+          setActivePiece([rank + file]);
+        } else {
+          setActivePiece([]);
+        }
       } else {
         setActivePiece([]);
       }
@@ -201,7 +205,7 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
             <Highlight
               square={square}
               key={square}
-              color={"red"}
+              style={{ backgroundColor: "rgb(235, 97, 80)", opacity: "0.8" }}
               boardClick={boardClick}
             />
           );
@@ -212,8 +216,7 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
             <Highlight
               square={square}
               key={square}
-              color={"lightgrey"}
-              boardClick={boardClick}
+              style={{ backgroundColor: "rgb(255, 255, 0)", opacity: "0.5" }}
             />
           );
         })}
@@ -222,9 +225,8 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
           return (
             <Highlight
               square={square}
-              key={square + "active"}
-              color={"yellow"}
-              clickHandler={clickHandler}
+              key={square}
+              style={{ backgroundColor: "rgb(255, 255, 0)", opacity: "0.5" }}
             />
           );
         })}
