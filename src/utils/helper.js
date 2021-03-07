@@ -27,13 +27,13 @@ export function sanToHexTo(list) {
 }
 
 export function isLegal(moves, from, to) {
-  let san = false;
+  let result = null;
   moves.forEach((move) => {
     if (from === move.from) {
       if (to === move.to) {
-        san = move.san;
+        result = move;
       }
     }
   });
-  return san;
+  return result;
 }

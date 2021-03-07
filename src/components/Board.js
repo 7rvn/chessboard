@@ -5,6 +5,10 @@ import Highlight from "./Highlight";
 import { algToHex } from "../utils/helper";
 
 import moveSelf from "../sounds/move-self.webm";
+import promote from "../sounds/promote.webm";
+import castle from "../sounds/castle.webm";
+import capture from "../sounds/capture.webm";
+
 import Hint from "./Hint";
 
 function animateMove({ moveFrom, moveTo, sound = null, boardOrientation }) {
@@ -88,7 +92,6 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
       );
     },
     highlightSquares(prop) {
-      console.log(prop);
       let highlightObj = [];
       prop.forEach((x) => {
         if (x.flags.includes("c") || x.flags.includes("e")) {
@@ -97,7 +100,6 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
           highlightObj.push([algToHex(x.to), ""]);
         }
       });
-      console.log(highlightObj);
 
       setHighlightSquares(highlightObj);
     },
@@ -124,12 +126,11 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
 
   const [animationSquares, setAnimationSquares] = React.useState({});
 
-  const [settings, setSettings] = React.useState({ orientation: "black" });
+  const [settings, setSettings] = React.useState({ orientation: "white" });
   const boardLayout =
     settings.orientation === "white" ? "board-layout" : "flipped board-layout";
 
   const handleKeyPress = (e) => {
-    e.preventDefault();
     if (e.key === "x") {
       if (settings.orientation === "white") {
         setSettings({ ...settings, orientation: "black" });
@@ -177,7 +178,7 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
         setLastClick(square);
         return;
       }
-      console.log("board trying to move", lastClick, square);
+      console.log(doit);
 
       // if last click is a piece and not the same square
       if (positionObj[lastClick] && lastClick !== square) {
@@ -186,6 +187,7 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
             moveFrom: lastClick,
             moveTo: square,
             boardOrientation: settings.orientation,
+            sound: doit.flags,
           })
         );
         setPositionObj(makeMove(lastClick, square));
@@ -210,8 +212,18 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
         return () => clearInterval(interval);
       } else {
         if (animation.sound) {
-          let audio = new Audio(moveSelf);
-          audio.play();
+          if (animation.sound.includes("c") || animation.sound.includes("e")) {
+            new Audio(capture).play();
+          } else if (
+            animation.sound.includes("k") ||
+            animation.sound.includes("q")
+          ) {
+            new Audio(castle).play();
+          } else if (animation.sound.includes("p")) {
+            new Audio(promote).play();
+          } else {
+            new Audio(moveSelf).play();
+          }
         }
         setAnimation();
         setAnimationSquares();

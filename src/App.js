@@ -38,10 +38,10 @@ function App() {
           let move = isLegal(game.moves({ verbose: true }), lastClick, san);
           if (move) {
             let newGame = { ...game };
-            newGame.move(move);
+            newGame.move(move.san);
 
             setGame(newGame);
-            return true;
+            return move;
           } else {
             activePiece = null;
             lastClick = null;
@@ -56,10 +56,10 @@ function App() {
         let move = isLegal(game.moves({ verbose: true }), lastClick, san);
         if (move) {
           let newGame = { ...game };
-          newGame.move(move);
+          newGame.move(move.san);
 
           setGame(newGame);
-          return true;
+          return move;
         } else {
           boardRef.current.highlightSquares([]);
 
