@@ -7,7 +7,7 @@ import { algToHex } from "../utils/helper";
 import moveSelf from "../sounds/move-self.webm";
 
 function animateMove(moveFrom, moveTo, sound) {
-  console.log("executing:", moveFrom, moveTo);
+  //console.log("executing:", moveFrom, moveTo);
 
   const xStart = moveFrom[1] * 100;
   const yStart = Math.abs(moveFrom[0] - 7) * 100;
@@ -39,7 +39,7 @@ function constructPositionObj(position) {
 }
 
 const Board = React.forwardRef(({ clickHandler, markings }, ref) => {
-  console.log("render board");
+  //console.log("render board");
 
   function makeMove(from, to) {
     const newPosition = { ...positionObj };
@@ -99,15 +99,18 @@ const Board = React.forwardRef(({ clickHandler, markings }, ref) => {
         setHighlights([]);
       }
 
+      let doit = clickHandler({ rank, file });
+      if (!doit) {
+        setLastClick(square);
+        return;
+      }
+      console.log("board trying to move", lastClick, square);
+
       // if last click is a piece and not the same square
       if (positionObj[lastClick] && lastClick !== square) {
         setAnimation(animateMove(lastClick, square));
         setPositionObj(makeMove(lastClick, square));
-      } else {
-        setLastClick(square);
       }
-
-      clickHandler({ rank, file });
     }
   }
 

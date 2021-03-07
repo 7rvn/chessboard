@@ -5,6 +5,12 @@ export function hexToAlgebraic(square) {
   );
 }
 
+export function hexToSan(rank, file) {
+  return (
+    String.fromCharCode(97 + parseInt(file)) + (parseInt(rank) + 1).toString()
+  );
+}
+
 export function algToHex(square) {
   return (
     (parseInt(square[1]) - 1).toString() +
