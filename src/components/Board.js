@@ -7,13 +7,24 @@ import { algToHex } from "../utils/helper";
 import moveSelf from "../sounds/move-self.webm";
 import Hint from "./Hint";
 
-function animateMove(moveFrom, moveTo, sound) {
+function animateMove({ moveFrom, moveTo, sound = null, boardOrientation }) {
   //console.log("executing:", moveFrom, moveTo);
+  let xStart;
+  let xEnd;
+  let yStart;
+  let yEnd;
 
-  const xStart = moveFrom[1] * 100;
-  const yStart = Math.abs(moveFrom[0] - 7) * 100;
-  const xEnd = moveTo[1] * 100;
-  const yEnd = Math.abs(moveTo[0] - 7) * 100;
+  if (boardOrientation === "white") {
+    xStart = Math.abs(moveFrom[1]) * 100;
+    yStart = Math.abs(moveFrom[0] - 7) * 100;
+    xEnd = Math.abs(moveTo[1]) * 100;
+    yEnd = Math.abs(moveTo[0] - 7) * 100;
+  } else {
+    xStart = Math.abs(moveFrom[1] - 7) * 100;
+    yStart = Math.abs(moveFrom[0]) * 100;
+    xEnd = Math.abs(moveTo[1] - 7) * 100;
+    yEnd = Math.abs(moveTo[0]) * 100;
+  }
 
   const animationObj = {
     square: moveFrom,
@@ -67,11 +78,28 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
       const from = algToHex(prop.from);
       const to = algToHex(prop.to);
       setPositionObj(makeMove(from, to));
-      setAnimation(animateMove(from, to, prop.flags));
+      setAnimation(
+        animateMove({
+          moveFrom: from,
+          moveTo: to,
+          sound: prop.flags,
+          boardOrientaion: settings.orientation,
+        })
+      );
     },
     highlightSquares(prop) {
-      console.log("highlight this: ", prop);
-      setHighlightSquares(prop);
+      console.log(prop);
+      let highlightObj = [];
+      prop.forEach((x) => {
+        if (x.flags.includes("c") || x.flags.includes("e")) {
+          highlightObj.push([algToHex(x.to), "capture-"]);
+        } else {
+          highlightObj.push([algToHex(x.to), ""]);
+        }
+      });
+      console.log(highlightObj);
+
+      setHighlightSquares(highlightObj);
     },
   }));
 
@@ -88,10 +116,12 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
 
   const [animationSquares, setAnimationSquares] = React.useState({});
 
+  const [settings, setSettings] = React.useState({ orientation: "black" });
+  const boardLayout =
+    settings.orientation === "white" ? "board-layout" : "flipped board-layout";
+
   function boardClick({ rank, file, e }) {
     e.preventDefault();
-
-    console.log("clicked on:", e.target);
 
     const square = rank.toString() + file.toString();
 
@@ -132,7 +162,13 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
 
       // if last click is a piece and not the same square
       if (positionObj[lastClick] && lastClick !== square) {
-        setAnimation(animateMove(lastClick, square));
+        setAnimation(
+          animateMove({
+            moveFrom: lastClick,
+            moveTo: square,
+            boardOrientation: settings.orientation,
+          })
+        );
         setPositionObj(makeMove(lastClick, square));
       }
     }
@@ -196,7 +232,7 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
   });
 
   return (
-    <div className="board-layout" style={{ width: "650px", height: "650px" }}>
+    <div className={boardLayout} style={{ width: "650px", height: "650px" }}>
       <div className="board" id="board-board">
         {squares}
 
@@ -231,8 +267,8 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
           );
         })}
 
-        {highlightSquares.map((square) => {
-          return <Hint square={square} key={square + "high"} />;
+        {highlightSquares.map((o) => {
+          return <Hint square={o[0]} flag={o[1]} key={o[0] + "high"} />;
         })}
       </div>
     </div>
