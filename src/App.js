@@ -21,17 +21,21 @@ function App() {
   }
 
   React.useEffect(() => {
+    boardRef.current.setBoard(game.board());
     setInterval(() => {
-      const move = game.moves({ verbose: true })[0];
+      const move = game.moves({ verbose: true })[
+        Math.floor(Math.random() * game.moves().length)
+      ];
       game.move(move);
       boardRef.current.makeDo(move);
+      boardRef.current.setBoard(game.board());
     }, 2000);
   }, [boardRef, game]);
 
   return (
     <div id="main">
       <NavBar />
-      <Board position={board} clickHandler={handleClick} ref={boardRef}></Board>
+      <Board clickHandler={handleClick} ref={boardRef}></Board>
     </div>
   );
 }

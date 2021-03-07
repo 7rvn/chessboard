@@ -4,7 +4,9 @@ import Square from "./Square";
 import Highlight from "./Highlight";
 import { algToHex } from "../utils/helper";
 
-function animateMove(moveFrom, moveTo) {
+import moveSelf from "../sounds/move-self.webm";
+
+function animateMove(moveFrom, moveTo, sound) {
   console.log("executing:", moveFrom, moveTo);
 
   const xStart = moveFrom[1] * 100;
@@ -19,6 +21,7 @@ function animateMove(moveFrom, moveTo) {
     xs: (xStart - xEnd) / 20,
     ys: (yStart - yEnd) / 20,
     count: 0,
+    sound: sound,
   };
   return animationObj;
 }
@@ -35,7 +38,9 @@ function constructPositionObj(position) {
   return positionObj;
 }
 
-const Board = React.forwardRef(({ position, clickHandler, markings }, ref) => {
+const Board = React.forwardRef(({ clickHandler, markings }, ref) => {
+  console.log("render board");
+
   function makeMove(from, to) {
     const newPosition = { ...positionObj };
     newPosition[from] = null;
@@ -52,18 +57,18 @@ const Board = React.forwardRef(({ position, clickHandler, markings }, ref) => {
   }
 
   React.useImperativeHandle(ref, () => ({
+    setBoard(prop) {
+      setPositionObj(constructPositionObj(prop));
+    },
     makeDo(prop) {
-      console.log("asbhljdaslhj", prop);
       const from = algToHex(prop.from);
       const to = algToHex(prop.to);
       setPositionObj(makeMove(from, to));
-      setAnimation(animateMove(from, to));
+      setAnimation(animateMove(from, to, prop.flags));
     },
   }));
 
-  console.log("render board");
-
-  const getInitialPosition = () => constructPositionObj(position);
+  const getInitialPosition = () => constructPositionObj([]);
   const [animation, setAnimation] = React.useState();
   const [positionObj, setPositionObj] = React.useState(getInitialPosition);
 
@@ -117,10 +122,15 @@ const Board = React.forwardRef(({ position, clickHandler, markings }, ref) => {
             ys: animation.ys,
             square: animation.square,
             count: animation.count + 1,
+            sound: animation.sound,
           });
         }, 2);
         return () => clearInterval(interval);
       } else {
+        if (animation.sound) {
+          let audio = new Audio(moveSelf);
+          audio.play();
+        }
         setAnimation();
         setAnimationSquares();
       }
@@ -179,7 +189,7 @@ const Board = React.forwardRef(({ position, clickHandler, markings }, ref) => {
             <Highlight
               square={square}
               key={square}
-              color={"grey"}
+              color={"lightgrey"}
               boardClick={boardClick}
             />
           );
