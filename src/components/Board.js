@@ -103,6 +103,14 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
     },
   }));
 
+  React.useEffect(() => {
+    document.addEventListener("keydown", handleKeyPress);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+    };
+  });
+
   const getInitialPosition = () => constructPositionObj([]);
   const [animation, setAnimation] = React.useState();
   const [positionObj, setPositionObj] = React.useState(getInitialPosition);
@@ -119,6 +127,17 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
   const [settings, setSettings] = React.useState({ orientation: "black" });
   const boardLayout =
     settings.orientation === "white" ? "board-layout" : "flipped board-layout";
+
+  const handleKeyPress = (e) => {
+    e.preventDefault();
+    if (e.key === "x") {
+      if (settings.orientation === "white") {
+        setSettings({ ...settings, orientation: "black" });
+      } else {
+        setSettings({ ...settings, orientation: "white" });
+      }
+    }
+  };
 
   function boardClick({ rank, file, e }) {
     e.preventDefault();
