@@ -26,3 +26,10 @@ src/App Kopie.js
 src/components/Board Kopie.js
 src/components/Square Kopie.js
 src/components/Square.js
+src/sounds/capture.webm
+src/sounds/castle.webm
+src/sounds/illegal.webm
+src/sounds/move-opponent.webm
+src/sounds/move-self.mp3
+src/sounds/move-self.webm
+src/sounds/promote.webm
