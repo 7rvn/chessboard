@@ -5,6 +5,7 @@ import Highlight from "./Highlight";
 import { algToHex } from "../utils/helper";
 
 import moveSelf from "../sounds/move-self.webm";
+import Hint from "./Hint";
 
 function animateMove(moveFrom, moveTo, sound) {
   //console.log("executing:", moveFrom, moveTo);
@@ -38,7 +39,7 @@ function constructPositionObj(position) {
   return positionObj;
 }
 
-const Board = React.forwardRef(({ clickHandler, markings }, ref) => {
+const Board = React.forwardRef(({ clickHandler }, ref) => {
   //console.log("render board");
 
   function makeMove(from, to) {
@@ -53,6 +54,8 @@ const Board = React.forwardRef(({ clickHandler, markings }, ref) => {
     });
     setLastMove([from, to]);
     setLastClick(null);
+    setActivePiece([]);
+    setHighlightSquares([]);
     return newPosition;
   }
 
@@ -66,6 +69,10 @@ const Board = React.forwardRef(({ clickHandler, markings }, ref) => {
       setPositionObj(makeMove(from, to));
       setAnimation(animateMove(from, to, prop.flags));
     },
+    highlightSquares(prop) {
+      console.log("highlight this: ", prop);
+      setHighlightSquares(prop);
+    },
   }));
 
   const getInitialPosition = () => constructPositionObj([]);
@@ -76,11 +83,15 @@ const Board = React.forwardRef(({ clickHandler, markings }, ref) => {
 
   const [highlights, setHighlights] = React.useState([]);
   const [lastMove, setLastMove] = React.useState([]);
+  const [activePiece, setActivePiece] = React.useState([]);
+  const [highlightSquares, setHighlightSquares] = React.useState([]);
 
   const [animationSquares, setAnimationSquares] = React.useState({});
 
   function boardClick({ rank, file, e }) {
     e.preventDefault();
+
+    console.log("clicked on:", e.target);
 
     const square = rank.toString() + file.toString();
 
@@ -93,10 +104,19 @@ const Board = React.forwardRef(({ clickHandler, markings }, ref) => {
       } else {
         copyHighlights.push(square);
       }
+
+      if (activePiece) {
+        setActivePiece([]);
+      }
       setHighlights(copyHighlights);
     } else if (e.button === 0) {
       if (highlights.length) {
         setHighlights([]);
+      }
+      if (activePiece !== rank + file) {
+        setActivePiece([rank + file]);
+      } else {
+        setActivePiece([]);
       }
 
       let doit = clickHandler({ rank, file });
@@ -196,6 +216,21 @@ const Board = React.forwardRef(({ clickHandler, markings }, ref) => {
               boardClick={boardClick}
             />
           );
+        })}
+
+        {activePiece.map((square) => {
+          return (
+            <Highlight
+              square={square}
+              key={square + "active"}
+              color={"yellow"}
+              clickHandler={clickHandler}
+            />
+          );
+        })}
+
+        {highlightSquares.map((square) => {
+          return <Hint square={square} key={square + "high"} />;
         })}
       </div>
     </div>

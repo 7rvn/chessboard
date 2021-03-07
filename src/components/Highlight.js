@@ -5,8 +5,6 @@ function Highlight({ square, color, clickHandler }) {
     <div
       className={`highlight square square-${square}`}
       style={{ backgroundColor: color }}
-      onClick={clickHandler}
-      onContextMenu={clickHandler}
     />
   );
 }

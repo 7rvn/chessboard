@@ -4,7 +4,7 @@ import Chess from "chess.js";
 
 import Board from "./components/Board";
 import NavBar from "./components/NavBar";
-import { hexToSan, isLegal } from "./utils/helper";
+import { hexToSan, isLegal, sanToHexTo } from "./utils/helper";
 
 function App() {
   //console.log("render app");
@@ -27,7 +27,22 @@ function App() {
 
     if (square) {
       if (square.color === turn) {
-        activePiece = square;
+        console.log(
+          "active: ",
+          activePiece,
+          " square: ",
+          square,
+          " =>",
+          activePiece === square
+        );
+        if (san === activePiece) {
+          boardRef.current.highlightSquares([]);
+          activePiece = null;
+        } else {
+          activePiece = san;
+          let legalMoves = game.moves({ square: san });
+          boardRef.current.highlightSquares(sanToHexTo(legalMoves));
+        }
       } else {
         if (activePiece) {
           //ask if legal
@@ -50,6 +65,7 @@ function App() {
     } else {
       if (activePiece) {
         //ask if legal
+        console.log("want to move: ", lastClick, " to ", san);
         let move = isLegal(game.moves({ verbose: true }), lastClick, san);
         if (move) {
           console.log("legal move");
