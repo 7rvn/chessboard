@@ -7,17 +7,18 @@ export function constructPgnTree() {
   let root = new Node(null);
   let prevNode = root;
   let klammerauf = false;
+  let klammerzu = false;
   let dotdot = false;
   let roots = [];
 
   // for each string starting with n.
   pgn_processed.forEach((e) => {
     const letter = /[a-zA-Z]/;
-    //console.log(e.split(" "));
+    console.log(e.split(" "));
 
     // for each split by whitespace
     e.split(" ").map((s) => {
-      //console.log("handle:", s);
+      console.log("handle:", s);
       let newNode = null;
       // if its a black move continunig after white move
       if (s.includes("..")) {
@@ -35,24 +36,28 @@ export function constructPgnTree() {
           let localroot = roots[roots.length - 1];
 
           if (dotdot) {
-            //console.log(move, "variation bei:", prevNode.parent.move);
+            console.log(move, "variation bei:", prevNode.parent.move);
             localroot.parent.addVariation(newNode);
             dotdot = false;
           } else {
-            //console.log(move, "variation bei:", prevNode.move);
-            localroot.addVariation(newNode);
+            console.log(move, "variation bei:", prevNode.parent.move);
+            localroot.parent.addVariation(newNode);
           }
           klammerauf = false;
 
           // if not immediately after start of variation
         } else {
           if (dotdot) {
-            roots[roots.length - 1].addChild(newNode);
-            //console.log(move, "after:", roots[roots.length - 1].move);
-
+            if (klammerzu) {
+              prevNode.addChild(newNode);
+              klammerzu = false;
+            } else {
+              roots[roots.length - 1].addChild(newNode);
+              console.log(move, "after:", roots[roots.length - 1].move);
+            }
             dotdot = false;
           } else {
-            //console.log(move, "after:", prevNode.move);
+            console.log(move, "after:", prevNode.move);
             prevNode.addChild(newNode);
           }
         }
@@ -67,6 +72,7 @@ export function constructPgnTree() {
 
       if (s.includes(")")) {
         prevNode = roots.pop();
+        klammerzu = true;
       }
     });
   });
