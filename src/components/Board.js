@@ -10,6 +10,7 @@ import moveSelf from "../sounds/move-self.webm";
 import promote from "../sounds/promote.webm";
 import castle from "../sounds/castle.webm";
 import capture from "../sounds/capture.webm";
+import moveCheck from "../sounds/move-check.webm";
 import EffectSquare from "./EffectSquare";
 
 function animateMove({ moveFrom, moveTo, sound = null, boardOrientation }) {
@@ -216,6 +217,8 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
         if (animation.sound) {
           if (animation.sound.includes("p")) {
             new Audio(promote).play();
+          } else if (animation.sound.includes("+")) {
+            new Audio(moveCheck).play();
           } else if (
             animation.sound.includes("k") ||
             animation.sound.includes("q")

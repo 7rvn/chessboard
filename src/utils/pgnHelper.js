@@ -14,11 +14,11 @@ export function constructPgnTree() {
   // for each string starting with n.
   pgn_processed.forEach((e) => {
     const letter = /[a-zA-Z]/;
-    console.log(e.split(" "));
+    //console.log(e.split(" "));
 
     // for each split by whitespace
     e.split(" ").map((s) => {
-      console.log("handle:", s);
+      //console.log("handle:", s);
       let newNode = null;
       // if its a black move continunig after white move
       if (s.includes("..")) {
@@ -36,11 +36,11 @@ export function constructPgnTree() {
           let localroot = roots[roots.length - 1];
 
           if (dotdot) {
-            console.log(move, "variation bei:", prevNode.parent.move);
+            //console.log(move, "variation bei:", prevNode.parent.move);
             localroot.parent.addVariation(newNode);
             dotdot = false;
           } else {
-            console.log(move, "variation bei:", prevNode.parent.move);
+            //console.log(move, "variation bei:", prevNode.parent.move);
             localroot.parent.addVariation(newNode);
           }
           klammerauf = false;
@@ -53,11 +53,11 @@ export function constructPgnTree() {
               klammerzu = false;
             } else {
               roots[roots.length - 1].addChild(newNode);
-              console.log(move, "after:", roots[roots.length - 1].move);
+              //console.log(move, "after:", roots[roots.length - 1].move);
             }
             dotdot = false;
           } else {
-            console.log(move, "after:", prevNode.move);
+            //console.log(move, "after:", prevNode.move);
             prevNode.addChild(newNode);
           }
         }
@@ -76,7 +76,7 @@ export function constructPgnTree() {
       }
     });
   });
-  console.log(root);
+  //console.log(root);
   return root;
 }
 

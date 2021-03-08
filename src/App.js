@@ -25,8 +25,13 @@ function App() {
   function validateMove(san) {
     if (activePiece) {
       let move = isLegal(game.moves({ verbose: true }), lastClick, san);
+
       // if move is legal
       if (move) {
+        if (move.san.includes("+")) {
+          console.log("issa check");
+          move.flags = move.flags + "+";
+        }
         // recommended moves from pgn
         const goodMoves = [currentNode.nextMove];
         if (currentNode.variation) {
@@ -44,6 +49,7 @@ function App() {
           setCurrentNode(found);
 
           setGame(newGame);
+          console.log(move);
           return move;
 
           // if move is not recommended
