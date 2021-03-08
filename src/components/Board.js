@@ -2,6 +2,8 @@ import * as React from "react";
 
 import Square from "./Square";
 import Highlight from "./Highlight";
+import Hint from "./Hint";
+
 import { algToHex } from "../utils/helper";
 
 import moveSelf from "../sounds/move-self.webm";
@@ -9,26 +11,15 @@ import promote from "../sounds/promote.webm";
 import castle from "../sounds/castle.webm";
 import capture from "../sounds/capture.webm";
 
-import Hint from "./Hint";
-
 function animateMove({ moveFrom, moveTo, sound = null, boardOrientation }) {
-  //console.log("executing:", moveFrom, moveTo);
-  let xStart;
-  let xEnd;
-  let yStart;
-  let yEnd;
-
-  if (boardOrientation === "white") {
-    xStart = Math.abs(moveFrom[1]) * 100;
-    yStart = Math.abs(moveFrom[0] - 7) * 100;
-    xEnd = Math.abs(moveTo[1]) * 100;
-    yEnd = Math.abs(moveTo[0] - 7) * 100;
-  } else {
-    xStart = Math.abs(moveFrom[1] - 7) * 100;
-    yStart = Math.abs(moveFrom[0]) * 100;
-    xEnd = Math.abs(moveTo[1] - 7) * 100;
-    yEnd = Math.abs(moveTo[0]) * 100;
+  let factor = 0;
+  if (boardOrientation === "black") {
+    factor = 7;
   }
+  const xStart = Math.abs(moveFrom[1] - factor) * 100;
+  const yStart = Math.abs(moveFrom[0] - (7 - factor)) * 100;
+  const xEnd = Math.abs(moveTo[1] - factor) * 100;
+  const yEnd = Math.abs(moveTo[0] - (7 - factor)) * 100;
 
   const animationObj = {
     square: moveFrom,
@@ -42,7 +33,7 @@ function animateMove({ moveFrom, moveTo, sound = null, boardOrientation }) {
   return animationObj;
 }
 
-function constructPositionObj(position) {
+function constructPosition(position) {
   let positionObj = {};
   position.forEach((rank, rankIndex) => {
     rank.forEach((square, fileIndex) => {
@@ -58,79 +49,85 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
   //console.log("render board");
 
   function makeMove(from, to) {
-    const newPosition = { ...positionObj };
+    const newPosition = { ...position };
     newPosition[from] = null;
-    newPosition[to] = positionObj[from];
+    newPosition[to] = position[from];
     setAnimationSquares({
       from: from,
-      fromPiece: positionObj[from],
+      fromPiece: position[from],
       to: to,
-      toPiece: positionObj[to],
+      toPiece: position[to],
     });
-    setLastMove([from, to]);
+    setHighlights({
+      ...highlights,
+      lastMove: [from, to],
+      activePiece: [],
+      hints: [],
+    });
     setLastClick(null);
-    setActivePiece([]);
-    setHighlightSquares([]);
     return newPosition;
   }
 
   React.useImperativeHandle(ref, () => ({
-    setBoard(prop) {
-      setPositionObj(constructPositionObj(prop));
+    setBoard(position) {
+      setposition(constructPosition(position));
     },
-    makeDo(prop) {
-      const from = algToHex(prop.from);
-      const to = algToHex(prop.to);
-      setPositionObj(makeMove(from, to));
+
+    makeMove(moveObj) {
+      const from = algToHex(moveObj.from);
+      const to = algToHex(moveObj.to);
+      setposition(makeMove(from, to));
       setAnimation(
         animateMove({
           moveFrom: from,
           moveTo: to,
-          sound: prop.flags,
+          sound: moveObj.flags,
           boardOrientaion: settings.orientation,
         })
       );
     },
-    highlightSquares(prop) {
-      let highlightObj = [];
-      prop.forEach((x) => {
+
+    hintSquares(squares) {
+      let hints = [];
+      squares.forEach((x) => {
         if (x.flags.includes("c") || x.flags.includes("e")) {
-          highlightObj.push([algToHex(x.to), "capture-"]);
+          hints.push([algToHex(x.to), "capture-"]);
         } else {
-          highlightObj.push([algToHex(x.to), ""]);
+          hints.push([algToHex(x.to), ""]);
         }
       });
 
-      setHighlightSquares(highlightObj);
+      setHighlights({ ...highlights, hints: hints });
     },
   }));
 
   React.useEffect(() => {
-    document.addEventListener("keydown", handleKeyPress);
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.removeEventListener("keydown", handleKeyPress);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   });
 
-  const getInitialPosition = () => constructPositionObj([]);
   const [animation, setAnimation] = React.useState();
-  const [positionObj, setPositionObj] = React.useState(getInitialPosition);
+  const [position, setposition] = React.useState({});
 
   const [lastClick, setLastClick] = React.useState(null);
-
-  const [highlights, setHighlights] = React.useState([]);
-  const [lastMove, setLastMove] = React.useState([]);
-  const [activePiece, setActivePiece] = React.useState([]);
-  const [highlightSquares, setHighlightSquares] = React.useState([]);
+  const [highlights, setHighlights] = React.useState({
+    lastMove: [],
+    activePiece: [],
+    hints: [],
+    markers: [],
+  });
 
   const [animationSquares, setAnimationSquares] = React.useState({});
 
   const [settings, setSettings] = React.useState({ orientation: "white" });
   const boardLayout =
     settings.orientation === "white" ? "board-layout" : "flipped board-layout";
+  const activePiece = highlights.activePiece;
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === "x") {
       if (settings.orientation === "white") {
         setSettings({ ...settings, orientation: "black" });
@@ -146,31 +143,31 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
     const square = rank.toString() + file.toString();
 
     if (e.button === 2) {
-      const copyHighlights = [...highlights];
-      const index = copyHighlights.indexOf(square);
+      const newMarkers = [...highlights.markers];
+      const index = newMarkers.indexOf(square);
 
       if (index > -1) {
-        copyHighlights.splice(index, 1);
+        newMarkers.splice(index, 1);
       } else {
-        copyHighlights.push(square);
+        newMarkers.push(square);
       }
 
       if (activePiece) {
-        setActivePiece([]);
+        setHighlights({ ...highlights, activePiece: [] });
       }
-      setHighlights(copyHighlights);
+      setHighlights({ ...highlights, markers: newMarkers });
     } else if (e.button === 0) {
       if (highlights.length) {
         setHighlights([]);
       }
       if (activePiece[0] !== rank + file) {
-        if (positionObj[rank + file]) {
-          setActivePiece([rank + file]);
+        if (position[rank + file]) {
+          setHighlights({ ...highlights, activePiece: [rank + file] });
         } else {
-          setActivePiece([]);
+          setHighlights({ ...highlights, activePiece: [] });
         }
       } else {
-        setActivePiece([]);
+        setHighlights({ ...highlights, activePiece: [] });
       }
 
       let doit = clickHandler({ rank, file });
@@ -178,10 +175,8 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
         setLastClick(square);
         return;
       }
-      console.log(doit);
 
-      // if last click is a piece and not the same square
-      if (positionObj[lastClick] && lastClick !== square) {
+      if (position[lastClick] && lastClick !== square) {
         setAnimation(
           animateMove({
             moveFrom: lastClick,
@@ -190,37 +185,37 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
             sound: doit.flags,
           })
         );
-        setPositionObj(makeMove(lastClick, square));
+        setposition(makeMove(lastClick, square));
       }
     }
   }
 
   React.useEffect(() => {
+    let interval;
     if (animation) {
       if (animation.count < 20) {
-        const interval = setTimeout(() => {
+        interval = setTimeout(() => {
           setAnimation({
+            ...animation,
             x: animation.x - animation.xs,
             y: animation.y - animation.ys,
-            xs: animation.xs,
-            ys: animation.ys,
-            square: animation.square,
             count: animation.count + 1,
-            sound: animation.sound,
           });
         }, 2);
-        return () => clearInterval(interval);
       } else {
         if (animation.sound) {
-          if (animation.sound.includes("c") || animation.sound.includes("e")) {
-            new Audio(capture).play();
+          if (animation.sound.includes("p")) {
+            new Audio(promote).play();
           } else if (
             animation.sound.includes("k") ||
             animation.sound.includes("q")
           ) {
             new Audio(castle).play();
-          } else if (animation.sound.includes("p")) {
-            new Audio(promote).play();
+          } else if (
+            animation.sound.includes("c") ||
+            animation.sound.includes("e")
+          ) {
+            new Audio(capture).play();
           } else {
             new Audio(moveSelf).play();
           }
@@ -229,10 +224,11 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
         setAnimationSquares();
       }
     }
+    return () => clearInterval(interval);
   }, [animation]);
 
   let squares = [];
-  Object.entries(positionObj).forEach((entry) => {
+  Object.entries(position).forEach((entry) => {
     let [square, piece] = entry;
 
     let style = null;
@@ -267,18 +263,17 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
       <div className="board" id="board-board">
         {squares}
 
-        {highlights.map((square) => {
+        {highlights.markers.map((square) => {
           return (
             <Highlight
               square={square}
               key={square}
               style={{ backgroundColor: "rgb(235, 97, 80)", opacity: "0.8" }}
-              boardClick={boardClick}
             />
           );
         })}
 
-        {lastMove.map((square) => {
+        {highlights.lastMove.map((square) => {
           return (
             <Highlight
               square={square}
@@ -288,7 +283,7 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
           );
         })}
 
-        {activePiece.map((square) => {
+        {highlights.activePiece.map((square) => {
           return (
             <Highlight
               square={square}
@@ -298,8 +293,8 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
           );
         })}
 
-        {highlightSquares.map((o) => {
-          return <Hint square={o[0]} flag={o[1]} key={o[0] + "high"} />;
+        {highlights.hints.map((hint) => {
+          return <Hint square={hint[0]} flag={hint[1]} key={hint[0]} />;
         })}
       </div>
     </div>

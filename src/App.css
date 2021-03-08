@@ -37,15 +37,43 @@
   }
 }
 
-#main {
-  background-color: #312e2b;
-  display: flex;
+@font-face {
+  font-family: "Montserrat";
+  src: local("Montserrat"),
+    url(./fonts/Montserrat/Montserrat-Medium.ttf) format("opentype");
 }
 
-.navbar {
-  width: 150px;
-  height: 100vh;
+#appgame {
+  background-color: #312e2b;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+#main {
+  display: flex;
+  flex-direction: row;
+}
+
+.sidebar {
   background-color: #272421;
+  height: 100vh;
+  display: inline-block;
+  flex: 0 0 150px;
+}
+
+.topbar {
+  height: 50px;
+  background-color: #272421;
+}
+
+#topbar-title {
+  font-family: Montserrat, sans-serif;
+  color: #fff;
+  margin-left: 50px;
+  font-size: 1.8em;
+  font-weight: 500;
+  line-height: 50px;
 }
 
 #board-board {

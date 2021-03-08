@@ -3,7 +3,8 @@ import "./App.css";
 import Chess from "chess.js";
 
 import Board from "./components/Board";
-import NavBar from "./components/NavBar";
+import SideBar from "./components/SideBar";
+import TopBar from "./components/TopBar";
 import { hexToSan, isLegal } from "./utils/helper";
 
 function App() {
@@ -16,6 +17,24 @@ function App() {
 
   let lastClick = null;
   let activePiece = null;
+
+  function ifActiveTryToMove(san) {
+    if (activePiece) {
+      let move = isLegal(game.moves({ verbose: true }), lastClick, san);
+      if (move) {
+        let newGame = { ...game };
+        newGame.move(move.san);
+
+        setGame(newGame);
+        return move;
+      } else {
+        activePiece = null;
+        lastClick = null;
+        boardRef.current.hintSquares([]);
+      }
+    }
+  }
+
   function handleClick({ rank, file }) {
     let san = hexToSan(rank, file);
 
@@ -24,49 +43,21 @@ function App() {
     if (square) {
       if (square.color === turn) {
         if (san === activePiece) {
-          boardRef.current.highlightSquares([]);
+          boardRef.current.hintSquares([]);
           activePiece = null;
         } else {
           activePiece = san;
           let legalMoves = game.moves({ square: san, verbose: true });
 
-          boardRef.current.highlightSquares(legalMoves);
+          boardRef.current.hintSquares(legalMoves);
         }
       } else {
-        if (activePiece) {
-          //ask if legal
-          let move = isLegal(game.moves({ verbose: true }), lastClick, san);
-          if (move) {
-            let newGame = { ...game };
-            newGame.move(move.san);
-
-            setGame(newGame);
-            return move;
-          } else {
-            activePiece = null;
-            lastClick = null;
-            boardRef.current.highlightSquares([]);
-          }
-        }
+        const move = ifActiveTryToMove(san);
+        return move;
       }
     } else {
-      if (activePiece) {
-        //ask if legal
-
-        let move = isLegal(game.moves({ verbose: true }), lastClick, san);
-        if (move) {
-          let newGame = { ...game };
-          newGame.move(move.san);
-
-          setGame(newGame);
-          return move;
-        } else {
-          boardRef.current.highlightSquares([]);
-
-          activePiece = null;
-          lastClick = null;
-        }
-      }
+      const move = ifActiveTryToMove(san);
+      return move;
     }
     lastClick = san;
   }
@@ -79,7 +70,7 @@ function App() {
   //       Math.floor(Math.random() * game.moves().length)
   //     ];
   //     game.move(move);
-  //     boardRef.current.makeDo(move);
+  //     boardRef.current.makeMove(move);
   //     boardRef.current.setBoard(game.board());
   //   }, 2000);
   // }, [boardRef, game]);
@@ -90,8 +81,12 @@ function App() {
 
   return (
     <div id="main">
-      <NavBar />
-      <Board clickHandler={handleClick} ref={boardRef}></Board>
+      <SideBar />
+
+      <div id="appgame">
+        <TopBar> Vienna Gambit</TopBar>
+        <Board clickHandler={handleClick} ref={boardRef}></Board>
+      </div>
     </div>
   );
 }
