@@ -129,6 +129,7 @@ function App() {
       <div id="appgame">
         <TopBar> Vienna Gambit</TopBar>
         <Board clickHandler={handleClick} ref={boardRef}></Board>
+        <div>{currentNode.comment}</div>
       </div>
     </div>
   );

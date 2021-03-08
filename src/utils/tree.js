@@ -1,9 +1,9 @@
-export function Node(move) {
+export function Node(move, comment = null) {
   this.move = move; // move has been made
   this.nextMove = null; // mainline move
   this.parent = null; // previous move
   this.variation = []; // variation, alternative to nextMove
-  this.comment = null;
+  this.comment = comment;
 
   this.setParentNode = function (node) {
     this.parent = node;
