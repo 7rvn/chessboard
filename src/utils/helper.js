@@ -37,3 +37,13 @@ export function isLegal(moves, from, to) {
   });
   return result;
 }
+
+export function getMoveObj(moves, san) {
+  let result = null;
+  moves.forEach((move) => {
+    if (san === move.san) {
+      result = move;
+    }
+  });
+  return result;
+}
