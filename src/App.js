@@ -6,31 +6,61 @@ import Board from "./components/Board";
 import SideBar from "./components/SideBar";
 import TopBar from "./components/TopBar";
 import { hexToSan, isLegal } from "./utils/helper";
+import { constructPgnTree } from "./utils/pgnHelper";
 
 function App() {
   //console.log("render app");
   const [game, setGame] = React.useState(new Chess());
+  const [currentNode, setCurrentNode] = React.useState(constructPgnTree);
+  const [settings] = React.useState({ w: "user", b: "user" });
 
   const boardRef = React.useRef();
 
-  let turn = game.turn();
+  const turn = game.turn();
+  const player = settings[turn];
 
   let lastClick = null;
   let activePiece = null;
 
-  function ifActiveTryToMove(san) {
+  function validateMove(san) {
     if (activePiece) {
       let move = isLegal(game.moves({ verbose: true }), lastClick, san);
+      // if move is legal
       if (move) {
-        let newGame = { ...game };
-        newGame.move(move.san);
+        // recommended moves from pgn
+        const goodMoves = [currentNode.nextMove];
+        if (currentNode.variation) {
+          currentNode.variation.forEach((element) => {
+            goodMoves.push(element);
+          });
+        }
 
-        setGame(newGame);
-        return move;
+        const found = goodMoves.find((e) => e.move === move.san);
+        // if move is in recommended
+        if (found) {
+          // execute move
+          let newGame = { ...game };
+          newGame.move(move.san);
+          setCurrentNode(found);
+
+          setGame(newGame);
+          return move;
+
+          // if move is not recommended
+        } else {
+          boardRef.current.alertEffect(san);
+          activePiece = null;
+          lastClick = null;
+          boardRef.current.hintSquares([]);
+          setTimeout(() => {
+            boardRef.current.alertEffect();
+            boardRef.current.setBoard(game.board());
+          }, 2000);
+          return move;
+        }
+
+        // if move is illegal
       } else {
-        activePiece = null;
-        lastClick = null;
-        boardRef.current.hintSquares([]);
       }
     }
   }
@@ -52,28 +82,18 @@ function App() {
           boardRef.current.hintSquares(legalMoves);
         }
       } else {
-        const move = ifActiveTryToMove(san);
+        const move = validateMove(san);
         return move;
       }
     } else {
-      const move = ifActiveTryToMove(san);
+      const move = validateMove(san);
       return move;
     }
     lastClick = san;
   }
 
-  /* Computer vs. Computer random moves */
-  // React.useEffect(() => {
-  //   boardRef.current.setBoard(game.board());
-  //   setInterval(() => {
-  //     const move = game.moves({ verbose: true })[
-  //       Math.floor(Math.random() * game.moves().length)
-  //     ];
-  //     game.move(move);
-  //     boardRef.current.makeMove(move);
-  //     boardRef.current.setBoard(game.board());
-  //   }, 2000);
-  // }, [boardRef, game]);
+  if (player === "computer") {
+  }
 
   React.useEffect(() => {
     boardRef.current.setBoard(game.board());

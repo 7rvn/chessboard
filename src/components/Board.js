@@ -10,6 +10,7 @@ import moveSelf from "../sounds/move-self.webm";
 import promote from "../sounds/promote.webm";
 import castle from "../sounds/castle.webm";
 import capture from "../sounds/capture.webm";
+import EffectSquare from "./EffectSquare";
 
 function animateMove({ moveFrom, moveTo, sound = null, boardOrientation }) {
   let factor = 0;
@@ -99,6 +100,11 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
 
       setHighlights({ ...highlights, hints: hints });
     },
+
+    alertEffect(square) {
+      square = square ? algToHex(square) : null;
+      setEffectSquare({ square: square, t: "illegal" });
+    },
   }));
 
   React.useEffect(() => {
@@ -118,6 +124,10 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
     activePiece: [],
     hints: [],
     markers: [],
+  });
+  const [effectSquare, setEffectSquare] = React.useState({
+    square: null,
+    flag: null,
   });
 
   const [animationSquares, setAnimationSquares] = React.useState({});
@@ -258,6 +268,16 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
     );
   });
 
+  let effectSquareItem = null;
+  if (effectSquare.square) {
+    effectSquareItem = (
+      <EffectSquare
+        square={effectSquare.square}
+        flag={effectSquare.flag}
+      ></EffectSquare>
+    );
+  }
+
   return (
     <div className={boardLayout} style={{ width: "650px", height: "650px" }}>
       <div className="board" id="board-board">
@@ -296,6 +316,8 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
         {highlights.hints.map((hint) => {
           return <Hint square={hint[0]} flag={hint[1]} key={hint[0]} />;
         })}
+
+        {effectSquareItem}
       </div>
     </div>
   );
