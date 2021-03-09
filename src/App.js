@@ -4,7 +4,7 @@ import Chess from "chess.js";
 
 import Board from "./components/Board";
 import SideBar from "./components/SideBar";
-import TopBar from "./components/TopBar";
+import SideboxItem from "./components/Sidebox";
 import { getMoveObj, hexToSan, isLegal } from "./utils/helper";
 import { constructPgnTree } from "./utils/pgnHelper";
 
@@ -127,9 +127,12 @@ function App() {
       <SideBar />
 
       <div id="appgame">
-        <TopBar> Vienna Gambit</TopBar>
         <Board clickHandler={handleClick} ref={boardRef}></Board>
-        <div>{currentNode.comment}</div>
+      </div>
+
+      <div className="sidebox">
+        <span id="sidebox-title">{"Vienna Gambit"}</span>
+        <SideboxItem move={currentNode.move} comment={currentNode.comment} />
       </div>
     </div>
   );
