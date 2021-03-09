@@ -55,3 +55,4 @@ src/fonts/Montserrat/OFL.txt
 src/sounds/move-check.webm
 src/App-basic.js
 src/App-playAlone-RandomVsRandom.js
+src/utils/data.json

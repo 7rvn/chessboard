@@ -3,18 +3,22 @@ import "./App.css";
 import Chess from "chess.js";
 
 import Board from "./components/Board";
-import SideBar from "./components/SideBar";
 import SideboxItem from "./components/Sidebox";
 import { getMoveObj, hexToSan, isLegal } from "./utils/helper";
 import { constructPgnTree } from "./utils/pgnHelper";
+import * as data from "./utils/data.json";
 
 function App() {
   //console.log("render app");
   const [game, setGame] = React.useState(new Chess());
-  const [currentNode, setCurrentNode] = React.useState(constructPgnTree);
-  const [settings] = React.useState({ w: "user", b: "computer" });
+  const [currentNode, setCurrentNode] = React.useState(
+    constructPgnTree(data.default.pgn1.pgn)
+  );
+  const [settings, setSettings] = React.useState({ w: "user", b: "computer" });
 
-  console.log(currentNode.move);
+  if (currentNode.nextMove) {
+    console.log("next: ", currentNode.nextMove.move);
+  }
 
   const boardRef = React.useRef();
 
@@ -71,6 +75,12 @@ function App() {
       } else {
       }
     }
+  }
+
+  function changePgn(pgn) {
+    setCurrentNode(constructPgnTree(data.default[pgn].pgn));
+    setGame(new Chess());
+    setSettings({ w: "user", b: "computer" });
   }
 
   function handleClick({ rank, file }) {
@@ -155,7 +165,18 @@ function App() {
 
   return (
     <div id="main">
-      <SideBar />
+      <div className={"sidebar"}>
+        {Object.entries(data.default).map((e) => {
+          return (
+            <button
+              className={"sidebar-button"}
+              onClick={() => changePgn(e[0])}
+            >
+              {e[1].title}
+            </button>
+          );
+        })}
+      </div>
 
       <div id="appgame">
         <Board clickHandler={handleClick} ref={boardRef}></Board>

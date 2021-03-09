@@ -43,6 +43,10 @@
     url(./fonts/Montserrat/Montserrat-Medium.ttf) format("opentype");
 }
 
+button {
+  outline: none;
+}
+
 body {
   color: #fff;
 }
@@ -63,10 +67,22 @@ body {
   height: 100vh;
   display: inline-block;
   flex: 0 0 150px;
+  padding: 0 10px;
+}
+
+.sidebar-button {
+  background-color: #312e2b;
+  border: none;
+  margin-top: 10px;
+  color: white;
+  padding: 5px 32px;
+  text-align: center;
+  display: inline-block;
+  font-size: 0.8em;
 }
 
 .sidebox {
-  margin-top: 30px;
+  margin-top: 60px;
   height: 80vh;
   background-color: #272421;
   min-width: 23vw;
@@ -118,8 +134,7 @@ body {
 }
 
 .board-layout {
-  padding: 30px;
-  padding-top: 90px;
+  padding: 90px 100px 0 100px;
 }
 
 .piece {

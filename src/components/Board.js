@@ -282,7 +282,7 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
   }
 
   return (
-    <div className={boardLayout} style={{ width: "650px", height: "650px" }}>
+    <div className={boardLayout} style={{ width: "750px", height: "750px" }}>
       <div className="board" id="board-board">
         {squares}
 
