@@ -14,7 +14,11 @@ function App() {
   const [currentNode, setCurrentNode] = React.useState(constructPgnTree);
   const [settings] = React.useState({ w: "user", b: "computer" });
 
+  console.log(currentNode.move);
+
   const boardRef = React.useRef();
+
+  const sideRef = React.useRef();
 
   const turn = game.turn();
 
@@ -28,7 +32,6 @@ function App() {
       // if move is legal
       if (move) {
         if (move.san.includes("+")) {
-          console.log("issa check");
           move.flags = move.flags + "+";
         }
         // recommended moves from pgn
@@ -71,6 +74,9 @@ function App() {
   }
 
   function handleClick({ rank, file }) {
+    if (!currentNode.nextMove) {
+      return;
+    }
     let san = hexToSan(rank, file);
 
     let square = game.get(san);
@@ -98,8 +104,33 @@ function App() {
   }
 
   React.useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  });
+
+  const handleKeyDown = (e) => {
+    if (e.key === "ArrowLeft") {
+      let newGame = { ...game };
+      let undo = newGame.undo();
+      undo = newGame.undo();
+      if (undo) {
+        boardRef.current.setBoard(newGame.board());
+        setCurrentNode(currentNode.parent.parent);
+        setGame(newGame);
+      }
+    }
+  };
+
+  React.useEffect(() => {
+    if (currentNode.nextMove === null) {
+      sideRef.current.toggleAlert("yessa");
+    }
+
     boardRef.current.setBoard(game.board());
-    if (settings[game.turn()] === "computer") {
+    if (settings[game.turn()] === "computer" && currentNode.nextMove != null) {
       const goodMoves = [currentNode.nextMove];
       if (currentNode.variation) {
         currentNode.variation.forEach((element) => {
@@ -130,10 +161,11 @@ function App() {
         <Board clickHandler={handleClick} ref={boardRef}></Board>
       </div>
 
-      <div className="sidebox">
-        <span id="sidebox-title">{"Vienna Gambit"}</span>
-        <SideboxItem move={currentNode.move} comment={currentNode.comment} />
-      </div>
+      <SideboxItem
+        ref={sideRef}
+        move={currentNode.move}
+        comment={currentNode.comment}
+      />
     </div>
   );
 }
