@@ -4,7 +4,7 @@ export function Node(move, comment = null) {
   this.parent = null; // previous move
   this.variation = []; // variation, alternative to nextMove
   this.comment = comment;
-
+  this.id = null;
   this.setParentNode = function (node) {
     this.parent = node;
   };

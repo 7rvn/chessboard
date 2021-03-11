@@ -90,11 +90,34 @@ body {
   flex-direction: column;
 }
 
+.pgn-move {
+  display: inline-block;
+  border: none;
+  text-align: center;
+  color: white;
+  background-color: #312e2b;
+}
+
+.pgn-view {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.current-move {
+  background-color: #61dafb;
+}
+
 .alertbox {
   margin-top: auto;
   width: 100%;
   height: 10vh;
   background-color: green;
+}
+
+.flex-break {
+  flex-basis: 100%;
+  height: 0;
 }
 
 #sidebox-title {
@@ -109,6 +132,13 @@ body {
   text-align: center;
 }
 
+.sidebox-toggle > div {
+  width: 50%;
+  display: inline-block;
+  text-align: center;
+  cursor: pointer;
+}
+
 .pgn-comment {
   background-color: #312e2b;
   padding: 10px 10px;
@@ -118,6 +148,22 @@ body {
 
 .pgn-comment > span {
   display: block;
+}
+
+.pgn-view {
+  width: 20vw;
+}
+
+.variation-layer-1 {
+  margin-left: 10px;
+}
+
+.variation-layer-2 {
+  margin-left: 20px;
+}
+
+.variation-layer-3 {
+  margin-left: 30px;
 }
 
 .comment-title {

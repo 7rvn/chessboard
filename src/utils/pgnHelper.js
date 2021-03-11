@@ -1,6 +1,7 @@
 import { Node } from "./tree";
 
 export function constructPgnTree(pgn) {
+  let nodeId = 0;
   const pgn_processed = pgn
     .replace(/}\)/g, "} )")
     .split(/\d+\.(?![^{]*})(?![^{]*})/);
@@ -32,6 +33,8 @@ export function constructPgnTree(pgn) {
           const move = s.replace(/\)|\(|\.|\s/, "");
 
           newNode = new Node(move);
+          newNode.id = nodeId;
+          nodeId++;
 
           // if starts variation
           if (klammerauf) {

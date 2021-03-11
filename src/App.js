@@ -14,11 +14,13 @@ function App() {
   const [currentNode, setCurrentNode] = React.useState(
     constructPgnTree(data.default.pgn1.pgn)
   );
-  const [settings, setSettings] = React.useState({ w: "user", b: "computer" });
-
-  if (currentNode.nextMove) {
-    console.log("next: ", currentNode.nextMove.move);
-  }
+  const [settings, setSettings] = React.useState({
+    w: "user",
+    b: "computer",
+    title: "1. e4 e5, Vienna Gambit",
+    rootNode: currentNode,
+    sidebox: "pgn-view",
+  });
 
   const boardRef = React.useRef();
 
@@ -78,9 +80,63 @@ function App() {
   }
 
   function changePgn(pgn) {
-    setCurrentNode(constructPgnTree(data.default[pgn].pgn));
+    let tree = constructPgnTree(data.default[pgn].pgn);
+    setCurrentNode(tree);
     setGame(new Chess());
-    setSettings({ w: "user", b: "computer" });
+    setSettings({
+      ...settings,
+      w: "user",
+      b: "computer",
+      title: data.default[pgn].title,
+      rootNode: tree,
+    });
+  }
+
+  function constructPgnDivs(node, layer = 0) {
+    let out = [];
+    let style = "";
+    while (node.nextMove) {
+      if (node === currentNode) {
+        style = " current-move";
+      } else {
+        style = "";
+      }
+
+      out.push(
+        <button className={"pgn-move" + style} key={node.id}>
+          {node.move}
+        </button>
+      );
+      if (node.variation.length) {
+        for (let i = 0; i < node.variation.length; i++) {
+          out.push(
+            <div
+              className={"variation-layer-" + (layer + 1)}
+              key={node.id + " " + layer + i}
+            >
+              {"("}
+              {constructPgnDivs(node.variation[i], layer + 1)}
+              {")"}
+            </div>
+          );
+          out.push(
+            <div
+              className={"flex-break"}
+              key={node.id + " " + layer + i + "flex"}
+            ></div>
+          );
+        }
+      }
+
+      node = node.nextMove;
+    }
+
+    out.push(
+      <button className={"pgn-move" + style} key={node.id}>
+        {node.move}
+      </button>
+    );
+    return out;
   }
 
   function handleClick({ rank, file }) {
@@ -163,14 +219,17 @@ function App() {
     }
   }, [game, currentNode, settings]);
 
+  const pgnview = constructPgnDivs(settings.rootNode);
+
   return (
     <div id="main">
       <div className={"sidebar"}>
-        {Object.entries(data.default).map((e) => {
+        {Object.entries(data.default).map((e, index) => {
           return (
             <button
               className={"sidebar-button"}
               onClick={() => changePgn(e[0])}
+              key={index}
             >
               {e[1].title}
             </button>
@@ -181,12 +240,13 @@ function App() {
       <div id="appgame">
         <Board clickHandler={handleClick} ref={boardRef}></Board>
       </div>
-
       <SideboxItem
         ref={sideRef}
         move={currentNode.move}
         comment={currentNode.comment}
-      />
+        pgnview={pgnview}
+        title={settings.title}
+      ></SideboxItem>
     </div>
   );
 }
