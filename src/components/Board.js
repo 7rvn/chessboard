@@ -133,7 +133,10 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
 
   const [animationSquares, setAnimationSquares] = React.useState({});
 
-  const [settings, setSettings] = React.useState({ orientation: "white" });
+  const [settings, setSettings] = React.useState({
+    orientation: "white",
+    size: 500,
+  });
   const boardLayout =
     settings.orientation === "white" ? "board-layout" : "flipped board-layout";
   const activePiece = highlights.activePiece;
@@ -281,9 +284,32 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
     );
   }
 
+  let resizeX;
+
+  const initResize = (e) => {
+    resizeX = e.clientX;
+
+    document.addEventListener("mousemove", moveResize, false);
+    document.addEventListener("mouseup", stopResize, false);
+  };
+
+  const moveResize = (e) => {
+    setSettings({ ...settings, size: settings.size + (e.clientX - resizeX) });
+  };
+
+  const stopResize = (e) => {
+    document.removeEventListener("mousemove", moveResize, false);
+    document.removeEventListener("mouseup", stopResize, false);
+    console.log("done");
+  };
+
   return (
-    <div className={boardLayout} style={{ width: "750px", height: "750px" }}>
-      <div className="board" id="board-board">
+    <div className={boardLayout}>
+      <div
+        className="board"
+        id="board-board"
+        style={{ width: settings.size + "px", height: settings.size + "px" }}
+      >
         {squares}
 
         {highlights.markers.map((square) => {
@@ -322,6 +348,7 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
 
         {effectSquareItem}
       </div>
+      <div className={"resizer"} onMouseDown={initResize}></div>
     </div>
   );
 });
