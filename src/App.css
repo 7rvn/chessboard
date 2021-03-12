@@ -78,7 +78,11 @@ body {
 }
 
 .current-move {
-  background-color: #61dafb;
+  background-color: #49a1b9;
+}
+
+.next-move {
+  background-color: #76be4c;
 }
 
 .alertbox {
@@ -210,6 +214,10 @@ body {
   top: -5.5%;
   width: 12.5%;
   z-index: 10;
+}
+
+.hide {
+  display: none;
 }
 
 .wp {

@@ -98,6 +98,11 @@ function App() {
     while (node.nextMove) {
       if (node === currentNode) {
         style = " current-move";
+      } else if (
+        node === currentNode.nextMove ||
+        currentNode.variation.includes(node)
+      ) {
+        style = " next-move";
       } else {
         style = "";
       }

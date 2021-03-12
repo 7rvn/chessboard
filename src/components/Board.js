@@ -135,7 +135,7 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
 
   const [settings, setSettings] = React.useState({
     orientation: "white",
-    size: 500,
+    size: 700,
   });
   const boardLayout =
     settings.orientation === "white" ? "board-layout" : "flipped board-layout";
