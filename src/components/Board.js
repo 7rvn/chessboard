@@ -48,7 +48,7 @@ function constructPosition(position) {
 }
 
 const Board = React.forwardRef(({ clickHandler }, ref) => {
-  //console.log("render board");
+  console.log("render board");
 
   function makeMove(from, to) {
     const newPosition = { ...position };
@@ -108,6 +108,18 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
     },
   }));
 
+  const handleMove = (e) => {
+    let x =
+      ((e.clientX - e.target.parentElement.offsetLeft) /
+        e.target.parentElement.offsetWidth) *
+      800;
+    let y =
+      ((e.clientY - e.target.parentElement.offsetTop) /
+        e.target.parentElement.offsetHeight) *
+      800;
+    console.log(x, y);
+  };
+
   React.useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);
 
@@ -135,7 +147,7 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
 
   const [settings, setSettings] = React.useState({
     orientation: "white",
-    size: 700,
+    size: 500,
   });
   const boardLayout =
     settings.orientation === "white" ? "board-layout" : "flipped board-layout";
@@ -151,8 +163,10 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
     }
   };
 
-  function boardClick({ rank, file, e }) {
+  function boardClick({ rank, file, e, drag = false }) {
     e.preventDefault();
+
+    console.log("click");
 
     const square = rank.toString() + file.toString();
 
@@ -191,14 +205,16 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
       }
 
       if (position[lastClick] && lastClick !== square) {
-        setAnimation(
-          animateMove({
-            moveFrom: lastClick,
-            moveTo: square,
-            boardOrientation: settings.orientation,
-            sound: doit.flags,
-          })
-        );
+        if (!drag) {
+          setAnimation(
+            animateMove({
+              moveFrom: lastClick,
+              moveTo: square,
+              boardOrientation: settings.orientation,
+              sound: doit.flags,
+            })
+          );
+        }
         setposition(makeMove(lastClick, square));
       }
     }
@@ -262,16 +278,17 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
       }
     }
 
-    squares.push(
-      <Square
-        piece={piece}
-        rank={square[0]}
-        file={square[1]}
-        key={square.toString()}
-        boardClick={boardClick}
-        style={style}
-      />
-    );
+    if (piece) {
+      squares.push(
+        <Square
+          piece={piece}
+          rank={square[0]}
+          file={square[1]}
+          key={square.toString()}
+          style={style}
+        />
+      );
+    }
   });
 
   let effectSquareItem = null;
@@ -303,12 +320,82 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
     console.log("done");
   };
 
+  const boardRef = React.useRef();
+
+  const [activeSquare, setActiveSquare] = React.useState();
+
+  const handleDragStart = React.useCallback(
+    (e) => {
+      const x =
+        ((e.clientX - boardRef.current.offsetLeft) /
+          boardRef.current.offsetWidth) *
+        800;
+
+      const y =
+        ((e.clientY - boardRef.current.offsetTop) /
+          boardRef.current.offsetHeight) *
+        800;
+
+      const rank = Math.abs(~~(y / 100) - 7);
+      const file = ~~(x / 100);
+
+      if (position[rank.toString() + file.toString()]) {
+        e.target.style.transform = `translate(${x - 50}%, ${y - 50}%)`;
+        e.target.style.zIndex = 100;
+        setActiveSquare(e.target);
+      }
+    },
+    [position]
+  );
+
+  const handleDrag = React.useCallback(
+    (e) => {
+      if (activeSquare) {
+        const x =
+          ((e.clientX - boardRef.current.offsetLeft) /
+            boardRef.current.offsetWidth) *
+          800;
+
+        const y =
+          ((e.clientY - boardRef.current.offsetTop) /
+            boardRef.current.offsetHeight) *
+          800;
+
+        const rank = Math.abs(~~(y / 100) - 7);
+        const file = ~~(x / 100);
+        activeSquare.style.transform = `translate(${x - 50}%, ${y - 50}%)`;
+      }
+    },
+    [activeSquare]
+  );
+
+  const handleDragEnd = React.useCallback(
+    (e) => {
+      setActiveSquare(null);
+      activeSquare.removeAttribute("style");
+      console.log("end");
+    },
+    [activeSquare]
+  );
+  React.useEffect(() => {
+    document.addEventListener("mousedown", handleDragStart);
+    document.addEventListener("mousemove", handleDrag);
+    document.addEventListener("mouseup", handleDragEnd);
+    return () => {
+      document.removeEventListener("mousedown", handleDragStart);
+      document.removeEventListener("mousemove", handleDrag);
+      document.removeEventListener("mouseup", handleDragEnd);
+    };
+  }, [handleDragStart, handleDrag, handleDragEnd]);
+
   return (
     <div className={boardLayout}>
       <div
         className="board"
         id="board-board"
         style={{ width: settings.size + "px", height: settings.size + "px" }}
+        ref={boardRef}
+        //onMouseMove={handleMove}
       >
         {squares}
 
@@ -348,7 +435,7 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
 
         {effectSquareItem}
       </div>
-      <div className={"resizer"} onMouseDown={initResize}></div>
+      {/* <div className={"resizer"} onMouseDown={initResize}></div> */}
     </div>
   );
 });

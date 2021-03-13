@@ -8,12 +8,12 @@ function getClassName(pieceObj) {
   }
 }
 
-function Square({ piece, rank, file, boardClick, style }) {
+function Square({ piece, rank, file, style }) {
+  console.log("render square");
+
   return (
     <div
       className={`${getClassName(piece)}square square-${rank}${file}`}
-      onClick={(e) => boardClick({ rank: rank, file: file, e: e })}
-      onContextMenu={(e) => boardClick({ rank: rank, file: file, e: e })}
       style={{ ...style }}
     />
   );
