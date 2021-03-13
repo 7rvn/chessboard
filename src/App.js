@@ -8,69 +8,45 @@ import { getMoveObj, hexToSan, isLegal, sanToHexTo } from "./utils/helper";
 import { constructPgnTree } from "./utils/pgnHelper";
 import * as data from "./utils/data.json";
 
+function getGoodMoves(node) {
+  const goodMoves = [node.nextMove];
+  if (node.variation) {
+    node.variation.forEach((element) => {
+      goodMoves.push(element);
+    });
+  }
+  return goodMoves;
+}
+
 function App() {
-  //console.log("render app");
+  console.log("render app");
 
   /* States */
   /* ************ */
-  const [game, setGame] = React.useState(new Chess());
-  const [currentNode, setCurrentNode] = React.useState(
-    constructPgnTree(data.default.pgn1.pgn)
-  );
+  const [state, setState] = React.useState({
+    game: new Chess(),
+    currentNode: constructPgnTree(data.default.pgn1.pgn),
+  });
+
   const [settings, setSettings] = React.useState({
     w: "user",
-    b: "user",
+    b: "computer",
     title: "1. e4 e5, Vienna Gambit",
-    rootNode: currentNode,
+    rootNode: state.currentNode,
     sidebox: "pgn-view",
   });
 
+  /* Refs & Derived State */
+  /* ************ */
   const boardRef = React.useRef();
   const sideRef = React.useRef();
+  const currentNode = state.currentNode;
 
-  // const turn = game.turn();
-
-  // function validateMove(props) {
-  //   let move = isLegal(game.moves({ verbose: true }));
-
-  //   // if move is legal
-  //   if (move) {
-  //     if (move.san.includes("+")) {
-  //       move.flags = move.flags + "+";
-  //     }
-  //     // recommended moves from pgn
-  //     const goodMoves = [currentNode.nextMove];
-  //     if (currentNode.variation) {
-  //       currentNode.variation.forEach((element) => {
-  //         goodMoves.push(element);
-  //       });
-  //     }
-
-  //     const found = goodMoves.find((e) => e.move === move.san);
-  //     // if move is in recommended
-  //     if (found) {
-  //       // execute move
-  //       let newGame = { ...game };
-  //       newGame.move(move.san);
-  //       setCurrentNode(found);
-
-  //       setGame(newGame);
-
-  //       return move;
-
-  //       // if move is not recommended
-  //     } else {
-  //     }
-
-  //     // if move is illegal
-  //   } else {
-  //   }
-  // }
-
+  /* Sidebar */
+  /* ************ */
   function changePgn(pgn) {
     let tree = constructPgnTree(data.default[pgn].pgn);
-    setCurrentNode(tree);
-    setGame(new Chess());
+    setState({ game: new Chess(), currentNode: tree });
     setSettings({
       ...settings,
       w: "user",
@@ -80,6 +56,8 @@ function App() {
     });
   }
 
+  /* Sidebox */
+  /* ************ */
   function constructPgnDivs(node, layer = 0) {
     let out = [];
     let style = "";
@@ -133,30 +111,24 @@ function App() {
   }
 
   function validateMove(move) {
-    const goodMoves = [currentNode.nextMove];
-    if (currentNode.variation) {
-      currentNode.variation.forEach((element) => {
-        goodMoves.push(element);
-      });
-    }
-
+    const goodMoves = getGoodMoves(currentNode);
     const found = goodMoves.find((e) => e.move === move.san);
-
     return found;
   }
 
+  /* Board Handler */
+  /* ************ */
   function handleDrag({ from, to }) {
     let fromSan = hexToSan(from.rank, from.file);
     let toSan = hexToSan(to.rank, to.file);
-    let move = isLegal(game.moves({ verbose: true }), fromSan, toSan);
+    let move = isLegal(state.game.moves({ verbose: true }), fromSan, toSan);
 
     if (move) {
       const node = validateMove(move);
       if (node) {
-        let newGame = { ...game };
+        let newGame = { ...state.game };
         newGame.move(move.san);
-        setGame(newGame);
-        setCurrentNode(node);
+        setState({ game: newGame, currentNode: node });
         return move;
       }
     }
@@ -164,59 +136,34 @@ function App() {
 
   function handleDragStart({ rank, file }) {
     const san = hexToSan(rank, file);
-    let legalMoves = game.moves({ square: san, verbose: true });
+    let legalMoves = state.game.moves({ square: san, verbose: true });
     return sanToHexTo(legalMoves.map((x) => x.to));
   }
 
+  /* Computer Moves */
+  /* ************ */
   React.useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  });
-
-  const handleKeyDown = (e) => {
-    if (e.key === "ArrowLeft") {
-      let newGame = { ...game };
-      let undo = newGame.undo();
-      undo = newGame.undo();
-      if (undo) {
-        boardRef.current.setBoard(newGame.board());
-        setCurrentNode(currentNode.parent.parent);
-        setGame(newGame);
-      }
-    }
-  };
-
-  React.useEffect(() => {
-    if (currentNode.nextMove === null) {
+    if (state.currentNode.nextMove === null) {
       sideRef.current.toggleAlert("yessa");
     }
 
-    boardRef.current.setBoard(game.board());
-    if (settings[game.turn()] === "computer" && currentNode.nextMove != null) {
-      const goodMoves = [currentNode.nextMove];
-      if (currentNode.variation) {
-        currentNode.variation.forEach((element) => {
-          goodMoves.push(element);
-        });
-      }
+    boardRef.current.setBoard(state.game.board());
+    if (
+      settings[state.game.turn()] === "computer" &&
+      state.currentNode.nextMove != null
+    ) {
+      const goodMoves = getGoodMoves(state.currentNode);
       const node = goodMoves[Math.floor(Math.random() * goodMoves.length)];
-      let move = getMoveObj(game.moves({ verbose: true }), node.move);
+
+      let move = getMoveObj(state.game.moves({ verbose: true }), node.move);
 
       setTimeout(() => {
-        let newGame = { ...game };
+        let newGame = { ...state.game };
         newGame.move(move);
-
-        boardRef.current.makeMove(move);
-        boardRef.current.setBoard(newGame.board());
-
-        setCurrentNode(node);
-        setGame(newGame);
+        setState({ game: newGame, currentNode: node });
       }, 500);
     }
-  }, [game, currentNode, settings]);
+  }, [state, settings]);
 
   const pgnview = constructPgnDivs(settings.rootNode);
 
