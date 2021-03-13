@@ -8,14 +8,11 @@ function getClassName(pieceObj) {
   }
 }
 
-function Square({ piece, rank, file, style }) {
+function Square({ piece, rank, file }) {
   // console.log("render square");
 
   return (
-    <div
-      className={`${getClassName(piece)}square square-${rank}${file}`}
-      style={{ ...style }}
-    />
+    <div className={`${getClassName(piece)}square square-${rank}${file}`} />
   );
 }
 

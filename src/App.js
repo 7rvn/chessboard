@@ -4,12 +4,15 @@ import Chess from "chess.js";
 
 import Board from "./components/Board";
 import SideboxItem from "./components/Sidebox";
-import { getMoveObj, hexToSan, isLegal } from "./utils/helper";
+import { getMoveObj, hexToSan, isLegal, sanToHexTo } from "./utils/helper";
 import { constructPgnTree } from "./utils/pgnHelper";
 import * as data from "./utils/data.json";
 
 function App() {
-  console.log("render app");
+  //console.log("render app");
+
+  /* States */
+  /* ************ */
   const [game, setGame] = React.useState(new Chess());
   const [currentNode, setCurrentNode] = React.useState(
     constructPgnTree(data.default.pgn1.pgn)
@@ -23,61 +26,46 @@ function App() {
   });
 
   const boardRef = React.useRef();
-
   const sideRef = React.useRef();
 
-  const turn = game.turn();
+  // const turn = game.turn();
 
-  let lastClick = null;
-  let activePiece = null;
+  // function validateMove(props) {
+  //   let move = isLegal(game.moves({ verbose: true }));
 
-  function validateMove(san) {
-    if (activePiece) {
-      let move = isLegal(game.moves({ verbose: true }), lastClick, san);
+  //   // if move is legal
+  //   if (move) {
+  //     if (move.san.includes("+")) {
+  //       move.flags = move.flags + "+";
+  //     }
+  //     // recommended moves from pgn
+  //     const goodMoves = [currentNode.nextMove];
+  //     if (currentNode.variation) {
+  //       currentNode.variation.forEach((element) => {
+  //         goodMoves.push(element);
+  //       });
+  //     }
 
-      // if move is legal
-      if (move) {
-        if (move.san.includes("+")) {
-          move.flags = move.flags + "+";
-        }
-        // recommended moves from pgn
-        const goodMoves = [currentNode.nextMove];
-        if (currentNode.variation) {
-          currentNode.variation.forEach((element) => {
-            goodMoves.push(element);
-          });
-        }
+  //     const found = goodMoves.find((e) => e.move === move.san);
+  //     // if move is in recommended
+  //     if (found) {
+  //       // execute move
+  //       let newGame = { ...game };
+  //       newGame.move(move.san);
+  //       setCurrentNode(found);
 
-        const found = goodMoves.find((e) => e.move === move.san);
-        // if move is in recommended
-        if (found) {
-          // execute move
-          let newGame = { ...game };
-          newGame.move(move.san);
-          setCurrentNode(found);
+  //       setGame(newGame);
 
-          setGame(newGame);
+  //       return move;
 
-          return move;
+  //       // if move is not recommended
+  //     } else {
+  //     }
 
-          // if move is not recommended
-        } else {
-          boardRef.current.alertEffect(san);
-          activePiece = null;
-          lastClick = null;
-          boardRef.current.hintSquares([]);
-          setTimeout(() => {
-            boardRef.current.alertEffect();
-            boardRef.current.setBoard(game.board());
-          }, 2000);
-          return move;
-        }
-
-        // if move is illegal
-      } else {
-      }
-    }
-  }
+  //     // if move is illegal
+  //   } else {
+  //   }
+  // }
 
   function changePgn(pgn) {
     let tree = constructPgnTree(data.default[pgn].pgn);
@@ -157,34 +145,10 @@ function App() {
     }
   }
 
-  function handleClick({ rank, file }) {
-    if (!currentNode.nextMove) {
-      return;
-    }
-    let san = hexToSan(rank, file);
-
-    let square = game.get(san);
-
-    if (square) {
-      if (square.color === turn) {
-        if (san === activePiece) {
-          boardRef.current.hintSquares([]);
-          activePiece = null;
-        } else {
-          activePiece = san;
-          let legalMoves = game.moves({ square: san, verbose: true });
-
-          boardRef.current.hintSquares(legalMoves);
-        }
-      } else {
-        const move = validateMove(san);
-        return move;
-      }
-    } else {
-      const move = validateMove(san);
-      return move;
-    }
-    lastClick = san;
+  function handleDragStart({ rank, file }) {
+    const san = hexToSan(rank, file);
+    let legalMoves = game.moves({ square: san, verbose: true });
+    return sanToHexTo(legalMoves.map((x) => x.to));
   }
 
   React.useEffect(() => {
@@ -256,7 +220,11 @@ function App() {
       </div>
 
       <div id="appgame">
-        <Board clickHandler={handleDrag} ref={boardRef}></Board>
+        <Board
+          clickHandler={handleDrag}
+          appHandleDragStart={handleDragStart}
+          ref={boardRef}
+        ></Board>
       </div>
       <SideboxItem
         ref={sideRef}
