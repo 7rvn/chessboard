@@ -9,14 +9,14 @@ import { constructPgnTree } from "./utils/pgnHelper";
 import * as data from "./utils/data.json";
 
 function App() {
-  //console.log("render app");
+  console.log("render app");
   const [game, setGame] = React.useState(new Chess());
   const [currentNode, setCurrentNode] = React.useState(
     constructPgnTree(data.default.pgn1.pgn)
   );
   const [settings, setSettings] = React.useState({
     w: "user",
-    b: "computer",
+    b: "user",
     title: "1. e4 e5, Vienna Gambit",
     rootNode: currentNode,
     sidebox: "pgn-view",
@@ -144,6 +144,19 @@ function App() {
     return out;
   }
 
+  function handleDrag({ from, to }) {
+    let fromSan = hexToSan(from.rank, from.file);
+    let toSan = hexToSan(to.rank, to.file);
+    let move = isLegal(game.moves({ verbose: true }), fromSan, toSan);
+    // console.log(move.san);
+    if (move) {
+      let newGame = { ...game };
+      newGame.move(move.san);
+      setGame(newGame);
+      return move;
+    }
+  }
+
   function handleClick({ rank, file }) {
     if (!currentNode.nextMove) {
       return;
@@ -243,7 +256,7 @@ function App() {
       </div>
 
       <div id="appgame">
-        <Board clickHandler={handleClick} ref={boardRef}></Board>
+        <Board clickHandler={handleDrag} ref={boardRef}></Board>
       </div>
       <SideboxItem
         ref={sideRef}

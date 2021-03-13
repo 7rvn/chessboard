@@ -9,7 +9,7 @@ function getClassName(pieceObj) {
 }
 
 function Square({ piece, rank, file, style }) {
-  console.log("render square");
+  // console.log("render square");
 
   return (
     <div

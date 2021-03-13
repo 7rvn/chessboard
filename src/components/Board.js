@@ -108,18 +108,6 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
     },
   }));
 
-  const handleMove = (e) => {
-    let x =
-      ((e.clientX - e.target.parentElement.offsetLeft) /
-        e.target.parentElement.offsetWidth) *
-      800;
-    let y =
-      ((e.clientY - e.target.parentElement.offsetTop) /
-        e.target.parentElement.offsetHeight) *
-      800;
-    console.log(x, y);
-  };
-
   React.useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);
 
@@ -323,6 +311,20 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
   const boardRef = React.useRef();
 
   const [activeSquare, setActiveSquare] = React.useState();
+  const [hoverSquare, setHoverSquare] = React.useState();
+
+  const setNewPosition = React.useCallback(
+    ({ from, to }) => {
+      const fromString = from.rank.toString() + from.file.toString();
+      const toString = to.rank.toString() + to.file.toString();
+      const newPosition = { ...position };
+
+      newPosition[fromString] = null;
+      newPosition[toString] = position[fromString];
+      return newPosition;
+    },
+    [position]
+  );
 
   const handleDragStart = React.useCallback(
     (e) => {
@@ -342,8 +344,10 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
       if (position[rank.toString() + file.toString()]) {
         e.target.style.transform = `translate(${x - 50}%, ${y - 50}%)`;
         e.target.style.zIndex = 100;
-        setActiveSquare(e.target);
+        setActiveSquare({ div: e.target, hex: { rank: rank, file: file } });
       }
+
+      //console.log("square start: ", rank, file);
     },
     [position]
   );
@@ -363,19 +367,56 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
 
         const rank = Math.abs(~~(y / 100) - 7);
         const file = ~~(x / 100);
-        activeSquare.style.transform = `translate(${x - 50}%, ${y - 50}%)`;
+        activeSquare.div.style.transform = `translate(${x - 50}%, ${y - 50}%)`;
+        //console.log(hoverSquare);
+        if (
+          !hoverSquare ||
+          hoverSquare.rank !== rank ||
+          hoverSquare.file !== file
+        ) {
+          setHoverSquare({ rank: rank, file: file });
+        }
       }
     },
-    [activeSquare]
+    [activeSquare, hoverSquare]
   );
 
   const handleDragEnd = React.useCallback(
     (e) => {
-      setActiveSquare(null);
-      activeSquare.removeAttribute("style");
-      console.log("end");
+      const x =
+        ((e.clientX - boardRef.current.offsetLeft) /
+          boardRef.current.offsetWidth) *
+        800;
+
+      const y =
+        ((e.clientY - boardRef.current.offsetTop) /
+          boardRef.current.offsetHeight) *
+        800;
+
+      const rank = Math.abs(~~(y / 100) - 7);
+      const file = ~~(x / 100);
+
+      activeSquare.div.removeAttribute("style");
+
+      let doit = clickHandler({
+        from: activeSquare.hex,
+        to: { rank: rank, file: file },
+      });
+
+      setActiveSquare();
+      setHoverSquare();
+      if (!doit) {
+        return;
+      }
+
+      setposition(
+        setNewPosition({
+          from: activeSquare.hex,
+          to: { rank: rank, file: file },
+        })
+      );
     },
-    [activeSquare]
+    [activeSquare, clickHandler, setNewPosition]
   );
   React.useEffect(() => {
     document.addEventListener("mousedown", handleDragStart);
@@ -387,6 +428,15 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
       document.removeEventListener("mouseup", handleDragEnd);
     };
   }, [handleDragStart, handleDrag, handleDragEnd]);
+
+  let hoverSquareDiv;
+  if (hoverSquare) {
+    hoverSquareDiv = (
+      <div
+        className={`hover-square square-${hoverSquare.rank}${hoverSquare.file}`}
+      ></div>
+    );
+  }
 
   return (
     <div className={boardLayout}>
@@ -429,11 +479,14 @@ const Board = React.forwardRef(({ clickHandler }, ref) => {
           );
         })}
 
+        {}
+
         {highlights.hints.map((hint) => {
           return <Hint square={hint[0]} flag={hint[1]} key={hint[0]} />;
         })}
 
         {effectSquareItem}
+        {hoverSquareDiv}
       </div>
       {/* <div className={"resizer"} onMouseDown={initResize}></div> */}
     </div>

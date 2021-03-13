@@ -183,6 +183,15 @@ body {
   z-index: 5;
 }
 
+.hover-square {
+  background: none;
+  border: 3px solid hsla(0, 0%, 100%, 0.65);
+  width: 12.5%;
+  height: 12.5%;
+  position: absolute;
+  box-sizing: border-box;
+}
+
 .highlight {
   z-index: 2;
 }
