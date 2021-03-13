@@ -132,16 +132,33 @@ function App() {
     return out;
   }
 
+  function validateMove(move) {
+    const goodMoves = [currentNode.nextMove];
+    if (currentNode.variation) {
+      currentNode.variation.forEach((element) => {
+        goodMoves.push(element);
+      });
+    }
+
+    const found = goodMoves.find((e) => e.move === move.san);
+
+    return found;
+  }
+
   function handleDrag({ from, to }) {
     let fromSan = hexToSan(from.rank, from.file);
     let toSan = hexToSan(to.rank, to.file);
     let move = isLegal(game.moves({ verbose: true }), fromSan, toSan);
-    // console.log(move.san);
+
     if (move) {
-      let newGame = { ...game };
-      newGame.move(move.san);
-      setGame(newGame);
-      return move;
+      const node = validateMove(move);
+      if (node) {
+        let newGame = { ...game };
+        newGame.move(move.san);
+        setGame(newGame);
+        setCurrentNode(node);
+        return move;
+      }
     }
   }
 
