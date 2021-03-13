@@ -19,7 +19,7 @@ function getGoodMoves(node) {
 }
 
 function App() {
-  console.log("render app");
+  // console.log("render app");
 
   /* States */
   /* ************ */
@@ -110,21 +110,19 @@ function App() {
     return out;
   }
 
-  function validateMove(move) {
-    const goodMoves = getGoodMoves(currentNode);
-    const found = goodMoves.find((e) => e.move === move.san);
-    return found;
-  }
-
   /* Board Handler */
   /* ************ */
   function handleDrag({ from, to }) {
+    if (!state.currentNode.nextMove) {
+      return;
+    }
     let fromSan = hexToSan(from.rank, from.file);
     let toSan = hexToSan(to.rank, to.file);
     let move = isLegal(state.game.moves({ verbose: true }), fromSan, toSan);
 
     if (move) {
-      const node = validateMove(move);
+      const goodMoves = getGoodMoves(currentNode);
+      const node = goodMoves.find((e) => e.move === move.san);
       if (node) {
         let newGame = { ...state.game };
         newGame.move(move.san);

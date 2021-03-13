@@ -95,6 +95,7 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
           setLegalSquares(appHandleDragStart({ rank: rank, file: file }));
           e.target.style.transform = `translate(${x - 50}%, ${y - 50}%)`;
           e.target.style.zIndex = 100;
+          e.target.style.cursor = "grabbing";
           setActiveSquare({ div: e.target, hex: { rank: rank, file: file } });
           setHoverSquare({ rank: rank, file: file });
         }
