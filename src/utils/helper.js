@@ -41,7 +41,7 @@ export function isLegal(moves, from, to) {
 export function getMoveObj(moves, san) {
   let result = null;
   moves.forEach((move) => {
-    if (san === move.san) {
+    if (san === move.san || san.slice(0, 1) + san.slice(2) === move.san) {
       result = move;
     }
   });
