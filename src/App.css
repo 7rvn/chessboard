@@ -40,6 +40,7 @@ body {
   top: 0;
   padding: 0 1rem;
   z-index: 100;
+  overflow: auto;
 }
 
 .sidebar-button {
@@ -75,6 +76,18 @@ body {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
+  overflow-y: auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
+  scrollbar-color: red yellow;
+}
+
+::-webkit-scrollbar {
+  background-color: rgb(216, 207, 207);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgb(134, 134, 134);
 }
 
 .current-move {
@@ -125,10 +138,6 @@ body {
 
 .pgn-comment > span {
   display: block;
-}
-
-.pgn-view {
-  width: 20vw;
 }
 
 .variation-layer-1 {

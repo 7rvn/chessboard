@@ -3,7 +3,7 @@ import "./App.css";
 import Chess from "chess.js";
 
 import Board from "./components/Board";
-import SideboxItem from "./components/Sidebox";
+import Sidebox from "./components/Sidebox";
 import { getMoveObj, hexToSan, isLegal, sanToHexTo } from "./utils/helper";
 import { constructPgnTree } from "./utils/pgnHelper";
 import * as data from "./utils/data.json";
@@ -39,7 +39,7 @@ function App() {
   /* Refs & Derived State */
   /* ************ */
   const boardRef = React.useRef();
-  const sideRef = React.useRef();
+  const sideboxRef = React.useRef();
   const currentNode = state.currentNode;
 
   /* Sidebar */
@@ -142,7 +142,7 @@ function App() {
   /* ************ */
   React.useEffect(() => {
     if (state.currentNode.nextMove === null) {
-      sideRef.current.toggleAlert("yessa");
+      sideboxRef.current.toggleAlert("yessa");
     }
 
     boardRef.current.setBoard(state.game.board());
@@ -188,13 +188,13 @@ function App() {
           ref={boardRef}
         ></Board>
       </div>
-      <SideboxItem
-        ref={sideRef}
+      <Sidebox
+        ref={sideboxRef}
         move={currentNode.move}
         comment={currentNode.comment}
         pgnview={pgnview}
         title={settings.title}
-      ></SideboxItem>
+      ></Sidebox>
     </div>
   );
 }

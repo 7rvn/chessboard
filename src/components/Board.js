@@ -1,8 +1,5 @@
 import * as React from "react";
 
-import Square from "./Square";
-import Hint from "./Hint";
-
 import moveSelf from "../sounds/move-self.webm";
 import promote from "../sounds/promote.webm";
 import castle from "../sounds/castle.webm";
@@ -128,28 +125,32 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
       const { rank, file } = getBoardPosition(e, boardRef.current);
 
       if (activeSquare) {
-        activeSquare.div.removeAttribute("style");
-
-        let validMove = clickHandler({
-          from: activeSquare.hex,
-          to: { rank: rank, file: file },
-        });
-
-        setLegalSquares([]);
         setActiveSquare();
-        setHoverSquare();
-        if (!validMove) {
-          return;
-        }
-
-        playSound(validMove.flags);
-
-        setposition(
-          setNewPosition({
+        activeSquare.div.removeAttribute("style");
+        // if drag ended on different square from where it started
+        if (activeSquare.hex.rank !== rank || activeSquare.hex.file !== file) {
+          let validMove = clickHandler({
             from: activeSquare.hex,
             to: { rank: rank, file: file },
-          })
-        );
+          });
+
+          setLegalSquares([]);
+          setHoverSquare();
+          if (!validMove) {
+            return;
+          }
+
+          playSound(validMove.flags);
+
+          setposition(
+            setNewPosition({
+              from: activeSquare.hex,
+              to: { rank: rank, file: file },
+            })
+          );
+        }
+        // if drag ended on start square handle it like a click
+      } else {
       }
     },
     [activeSquare, clickHandler, setNewPosition]
@@ -205,7 +206,12 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
 
     if (piece) {
       squareDivs.push(
-        <Square piece={piece} rank={square[0]} file={square[1]} key={square} />
+        <div
+          className={`piece ${piece.color + piece.type} square square-${
+            square[0]
+          }${square[1]}`}
+          key={square}
+        />
       );
     }
   });
@@ -227,8 +233,10 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
       >
         {squareDivs}
 
-        {legalSquares.map((hint, index) => {
-          return <Hint square={hint} flag={""} key={index} />;
+        {legalSquares.map((square, index) => {
+          return (
+            <div className={`${""}hint square square-${square}`} key={index} />
+          );
         })}
 
         {hoverSquareDiv}
