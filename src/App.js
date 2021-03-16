@@ -33,7 +33,6 @@ function App() {
     b: "computer",
     title: "1. e4 e5, Vienna Gambit",
     rootNode: state.currentNode.nextMove,
-    sidebox: "pgn-view",
     pgn: "pgn1",
   });
 
@@ -124,6 +123,7 @@ function App() {
   }
 
   function goToNode(node, skipPc) {
+    sideboxRef.current.reset();
     let path = [];
     const endNode = node;
 
@@ -151,7 +151,11 @@ function App() {
     if (move) {
       const goodMoves = getGoodMoves(currentNode);
       const node = goodMoves.find((e) => e.move === move.san);
+
       if (node) {
+        if (node.comment) {
+          sideboxRef.current.addItem({ title: node.move, body: node.comment });
+        }
         let newGame = { ...state.game };
         newGame.move(move.san);
         setState({ game: newGame, currentNode: node });
@@ -210,6 +214,12 @@ function App() {
         let move = getMoveObj(state.game.moves({ verbose: true }), node.move);
 
         setTimeout(() => {
+          if (node.comment) {
+            sideboxRef.current.addItem({
+              title: node.move,
+              body: node.comment,
+            });
+          }
           let newGame = { ...state.game };
           newGame.move(move);
           boardRef.current.makeMove(move);
@@ -250,8 +260,6 @@ function App() {
       </div>
       <Sidebox
         ref={sideboxRef}
-        move={currentNode.move}
-        comment={currentNode.comment}
         pgnview={pgnview}
         title={settings.title}
       ></Sidebox>

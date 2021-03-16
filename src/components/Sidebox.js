@@ -1,77 +1,63 @@
 import * as React from "react";
 
-const Sidebox = React.forwardRef(({ move, comment, pgnview, title }, ref) => {
+const Sidebox = React.forwardRef(({ pgnview, title }, ref) => {
   const [items, setItems] = React.useState([]);
-
-  const [alert, setAlert] = React.useState("none");
-  const [toggle, setToggle] = React.useState({
-    pgnView: "none",
-    comments: "block",
-    pgnViewButton: {},
-    commentButton: { backgroundColor: "grey" },
-  });
+  const [view, setView] = React.useState("comments");
 
   React.useImperativeHandle(ref, () => ({
-    toggleAlert(message) {
-      setAlert("block");
+    toggleAlert(message) {},
+    reset() {
+      setItems([]);
+    },
+    addItem({ title, body }) {
+      setItems([...items, { title: title, body: body }]);
     },
   }));
 
-  function showComments() {
-    if (toggle.comments === "none") {
-      setToggle({
-        pgnView: "none",
-        comments: "block",
-        pgnViewButton: {},
-        commentButton: { backgroundColor: "grey" },
-      });
-    }
+  function toggleView() {
+    view === "pgn" ? setView("comments") : setView("pgn");
   }
 
-  function showPgn() {
-    if (toggle.pgnView === "none") {
-      setToggle({
-        pgnView: "block",
-        comments: "none",
-        pgnViewButton: { backgroundColor: "grey" },
-        commentButton: {},
-      });
-    }
-  }
-
-  if (comment && !items.includes(move + "DELIMITERBREAKHERE" + comment)) {
-    setItems([...items, move + "DELIMITERBREAKHERE" + comment]);
-  }
   return (
     <div className="sidebox">
       <div className={"sidebox-toggle"}>
-        <div onClick={showComments} style={toggle.commentButton}>
+        <div
+          onClick={toggleView}
+          style={view === "comments" ? { backgroundColor: "grey" } : {}}
+        >
           comments
         </div>
-        <div onClick={showPgn} style={toggle.pgnViewButton}>
+        <div
+          onClick={toggleView}
+          style={view === "pgn" ? { backgroundColor: "grey" } : {}}
+        >
           PGN
         </div>
       </div>
+
       <span id="sidebox-title">{title}</span>
-      <div className={"pgn-comments"} style={{ display: toggle.comments }}>
+
+      <div
+        className={"comment-view"}
+        style={{ display: view === "comments" ? "block" : "none" }}
+      >
         {items.map((i, key) => {
-          let Damove = i.split("DELIMITERBREAKHERE")[0];
-          let Dacomment = i.split("DELIMITERBREAKHERE")[1];
           return (
             <div className="pgn-comment" key={key}>
-              <span className="comment-title">{Damove}</span>
-              <span className="comment-body">{Dacomment}</span>
+              <span className="comment-title">{i.title}</span>
+              <span className="comment-body">{i.body}</span>
             </div>
           );
         })}
       </div>
-      <div className={"pgn-view"} style={{ display: toggle.pgnView }}>
+
+      <div
+        className={"pgn-view"}
+        style={{ display: view === "pgn" ? "block" : "none" }}
+      >
         {pgnview}
       </div>
-      <div
-        className={"alertbox"}
-        style={{ backgroundColor: "green", display: alert }}
-      ></div>
+      <div className={"alertbox"}></div>
     </div>
   );
 });
