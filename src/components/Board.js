@@ -190,15 +190,16 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
   /* event listeners */
   /* ************ */
   React.useEffect(() => {
-    document.addEventListener("mousedown", handleDragStart);
-    document.addEventListener("mousemove", handleDrag);
-    document.addEventListener("mouseup", handleDragEnd);
-    document.addEventListener("keydown", handleKeyDown);
+    let b = boardRef.current;
+    b.addEventListener("mousedown", handleDragStart);
+    b.addEventListener("mousemove", handleDrag);
+    b.addEventListener("mouseup", handleDragEnd);
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener("mousedown", handleDragStart);
-      document.removeEventListener("mousemove", handleDrag);
-      document.removeEventListener("mouseup", handleDragEnd);
-      document.removeEventListener("keydown", handleKeyDown);
+      b.removeEventListener("mousedown", handleDragStart);
+      b.removeEventListener("mousemove", handleDrag);
+      b.removeEventListener("mouseup", handleDragEnd);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [handleDragStart, handleDrag, handleDragEnd, handleKeyDown]);
 
