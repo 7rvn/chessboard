@@ -52,6 +52,10 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
     setBoard(position) {
       setposition(constructPosition(position));
     },
+
+    makeMove(move) {
+      playSound(move.flags);
+    },
   }));
 
   /* States */

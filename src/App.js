@@ -182,6 +182,7 @@ function App() {
       setTimeout(() => {
         let newGame = { ...state.game };
         newGame.move(move);
+        boardRef.current.makeMove(move);
         setState({ game: newGame, currentNode: node });
       }, 500);
     }
