@@ -1,13 +1,19 @@
 import * as React from "react";
 
-const Sidebox = React.forwardRef(({ pgnview, title }, ref) => {
+const Sidebox = React.forwardRef(({ pgnview, title, restartFunction }, ref) => {
   const [items, setItems] = React.useState([]);
   const [view, setView] = React.useState("comments");
+  const [finish, setFinish] = React.useState(false);
 
   React.useImperativeHandle(ref, () => ({
-    toggleAlert(message) {},
+    toggleAlert(bool) {
+      if (finish !== bool) {
+        setFinish(bool);
+      }
+    },
     reset() {
       setItems([]);
+      setFinish(false);
     },
     addItem({ title, body }) {
       setItems([...items, { title: title, body: body }]);
@@ -57,7 +63,13 @@ const Sidebox = React.forwardRef(({ pgnview, title }, ref) => {
       >
         {pgnview}
       </div>
-      <div className={"alertbox"}></div>
+      <div
+        className={"restartbox"}
+        style={{ visibility: finish === true ? "visible" : "hidden" }}
+        onClick={restartFunction}
+      >
+        Restart
+      </div>
     </div>
   );
 });

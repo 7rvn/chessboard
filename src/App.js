@@ -32,7 +32,7 @@ function App() {
     w: "user",
     b: "computer",
     title: "1. e4 e5, Vienna Gambit",
-    rootNode: state.currentNode.nextMove,
+    rootNode: state.currentNode,
     pgn: "pgn1",
   });
 
@@ -45,6 +45,7 @@ function App() {
   /* Sidebar */
   /* ************ */
   function changePgn(pgn) {
+    sideboxRef.current.reset();
     let tree = constructPgnTree(data.default[pgn].pgn);
     setState({ game: new Chess(), currentNode: tree });
     setSettings({
@@ -138,10 +139,16 @@ function App() {
     setState({ game: game, currentNode: endNode, skipPc: skipPc });
   }
 
+  function restartPgn() {
+    sideboxRef.current.reset();
+    setState({ game: new Chess(), currentNode: settings.rootNode });
+  }
+
   /* Board Handler */
   /* ************ */
   function handleDrag({ from, to }) {
     if (!state.currentNode.nextMove) {
+      sideboxRef.current.toggleAlert(true);
       return;
     }
     let fromSan = hexToSan(from.rank, from.file);
@@ -200,7 +207,7 @@ function App() {
   React.useEffect(() => {
     boardRef.current.setBoard(state.game.board());
     if (state.currentNode.nextMove === null) {
-      sideboxRef.current.toggleAlert("yessa");
+      sideboxRef.current.toggleAlert(true);
     }
 
     if (state.skipPc !== true) {
@@ -262,6 +269,7 @@ function App() {
         ref={sideboxRef}
         pgnview={pgnview}
         title={settings.title}
+        restartFunction={restartPgn}
       ></Sidebox>
     </div>
   );
