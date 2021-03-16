@@ -32,7 +32,7 @@ function App() {
     w: "user",
     b: "computer",
     title: "1. e4 e5, Vienna Gambit",
-    rootNode: state.currentNode,
+    rootNode: state.currentNode.nextMove,
     sidebox: "pgn-view",
   });
 
@@ -62,6 +62,7 @@ function App() {
     let out = [];
     let style = "";
     while (node.nextMove) {
+      let start = out.length ? "" : "(";
       if (node === currentNode) {
         style = " current-move";
       } else if (
@@ -72,9 +73,15 @@ function App() {
       } else {
         style = "";
       }
+      let cnode = node;
 
       out.push(
-        <button className={"pgn-move" + style} key={node.id}>
+        <button
+          className={"pgn-move" + style}
+          key={node.id}
+          onClick={() => goToNode(cnode)}
+        >
+          {start}
           {node.move}
         </button>
       );
@@ -85,9 +92,7 @@ function App() {
               className={"variation-layer-" + (layer + 1)}
               key={node.id + " " + layer + i}
             >
-              {"("}
               {constructPgnDivs(node.variation[i], layer + 1)}
-              {")"}
             </div>
           );
           out.push(
@@ -103,11 +108,30 @@ function App() {
     }
 
     out.push(
-      <button className={"pgn-move" + style} key={node.id}>
-        {node.move}
+      <button
+        className={"pgn-move" + style}
+        key={node.id}
+        onClick={() => goToNode(node)}
+      >
+        {node.move} {")"}
       </button>
     );
     return out;
+  }
+
+  function goToNode(node) {
+    let path = [];
+    const endNode = node;
+
+    while (node.move) {
+      path.push(node.move);
+      node = node.parent;
+    }
+    let game = new Chess();
+    while (path.length) {
+      game.move(path.pop());
+    }
+    setState({ game: game, currentNode: endNode });
   }
 
   /* Board Handler */
@@ -164,6 +188,7 @@ function App() {
   }, [state, settings]);
 
   const pgnview = constructPgnDivs(settings.rootNode);
+  console.log(currentNode);
 
   return (
     <div id="main">
