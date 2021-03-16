@@ -234,7 +234,6 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
   };
 
   const moveResize = (e) => {
-    console.log(parseInt(boardSize) + (e.clientX - resizeX));
     setBoardSize(parseInt(boardSize) + (e.clientX - resizeX));
   };
 

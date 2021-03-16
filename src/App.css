@@ -55,6 +55,10 @@ body {
   font-size: 0.8em;
 }
 
+.active {
+  background-color: #7d7c7a;
+}
+
 .sidebox {
   height: 80%;
   background-color: #272421;

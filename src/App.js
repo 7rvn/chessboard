@@ -34,6 +34,7 @@ function App() {
     title: "1. e4 e5, Vienna Gambit",
     rootNode: state.currentNode.nextMove,
     sidebox: "pgn-view",
+    pgn: "pgn1",
   });
 
   /* Refs & Derived State */
@@ -53,6 +54,7 @@ function App() {
       b: "computer",
       title: data.default[pgn].title,
       rootNode: tree,
+      pgn: pgn,
     });
   }
 
@@ -225,7 +227,11 @@ function App() {
         {Object.entries(data.default).map((e, index) => {
           return (
             <button
-              className={"sidebar-button"}
+              className={
+                settings.pgn === e[0]
+                  ? "sidebar-button active"
+                  : "sidebar-button"
+              }
               onClick={() => changePgn(e[0])}
               key={index}
             >
