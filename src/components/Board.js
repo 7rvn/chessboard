@@ -220,6 +220,25 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
     }
   });
 
+  let resizeX;
+
+  const initResize = (e) => {
+    resizeX = e.clientX;
+
+    document.addEventListener("mousemove", moveResize, false);
+    document.addEventListener("mouseup", stopResize, false);
+  };
+
+  const moveResize = (e) => {
+    setSettings({ ...settings, size: settings.size + (e.clientX - resizeX) });
+  };
+
+  const stopResize = (e) => {
+    document.removeEventListener("mousemove", moveResize, false);
+    document.removeEventListener("mouseup", stopResize, false);
+    console.log("done");
+  };
+
   return (
     <div
       className={
@@ -245,6 +264,7 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
 
         {hoverSquareDiv}
       </div>
+      <div className={"resizer"} onMouseDown={initResize}></div>
     </div>
   );
 });
