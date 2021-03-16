@@ -63,13 +63,15 @@ function App() {
     let style = "";
     while (node.nextMove) {
       let start = out.length ? "" : "(";
-      if (node === currentNode) {
-        style = " current-move";
+      if (node === currentNode.nextMove) {
+        style = " next-move";
       } else if (
         node === currentNode.nextMove ||
         currentNode.variation.includes(node)
       ) {
         style = " next-move";
+      } else if (node === currentNode) {
+        style = " current-move";
       } else {
         style = "";
       }
@@ -119,7 +121,7 @@ function App() {
     return out;
   }
 
-  function goToNode(node) {
+  function goToNode(node, skipPc) {
     let path = [];
     const endNode = node;
 
@@ -131,7 +133,7 @@ function App() {
     while (path.length) {
       game.move(path.pop());
     }
-    setState({ game: game, currentNode: endNode });
+    setState({ game: game, currentNode: endNode, skipPc: skipPc });
   }
 
   /* Board Handler */
@@ -162,34 +164,60 @@ function App() {
     return sanToHexTo(legalMoves.map((x) => x.to));
   }
 
-  /* Computer Moves */
+  const handleKeyDown = React.useCallback(
+    (e) => {
+      if (e.key === "ArrowLeft") {
+        if (currentNode.parent) {
+          goToNode(currentNode.parent, true);
+        }
+      } else if (e.key === "ArrowRight") {
+        if (currentNode.nextMove) {
+          goToNode(currentNode.nextMove);
+        }
+      }
+    },
+    [currentNode]
+  );
+
+  /* event listeners */
   /* ************ */
   React.useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleKeyDown]);
+
+  /* Computer Moves */
+  /* ************ */
+
+  React.useEffect(() => {
+    boardRef.current.setBoard(state.game.board());
     if (state.currentNode.nextMove === null) {
       sideboxRef.current.toggleAlert("yessa");
     }
 
-    boardRef.current.setBoard(state.game.board());
-    if (
-      settings[state.game.turn()] === "computer" &&
-      state.currentNode.nextMove != null
-    ) {
-      const goodMoves = getGoodMoves(state.currentNode);
-      const node = goodMoves[Math.floor(Math.random() * goodMoves.length)];
+    if (state.skipPc !== true) {
+      if (
+        settings[state.game.turn()] === "computer" &&
+        state.currentNode.nextMove != null
+      ) {
+        const goodMoves = getGoodMoves(state.currentNode);
+        const node = goodMoves[Math.floor(Math.random() * goodMoves.length)];
 
-      let move = getMoveObj(state.game.moves({ verbose: true }), node.move);
+        let move = getMoveObj(state.game.moves({ verbose: true }), node.move);
 
-      setTimeout(() => {
-        let newGame = { ...state.game };
-        newGame.move(move);
-        boardRef.current.makeMove(move);
-        setState({ game: newGame, currentNode: node });
-      }, 500);
+        setTimeout(() => {
+          let newGame = { ...state.game };
+          newGame.move(move);
+          boardRef.current.makeMove(move);
+          setState({ game: newGame, currentNode: node });
+        }, 500);
+      }
     }
-  }, [state, settings]);
+  }, [state, settings, boardRef]);
 
   const pgnview = constructPgnDivs(settings.rootNode);
-  console.log(currentNode);
 
   return (
     <div id="main">
