@@ -61,10 +61,10 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
   /* States */
   /* ************ */
   const [position, setposition] = React.useState({});
-  const [settings, setSettings] = React.useState({
-    orientation: "white",
-    size: 500,
-  });
+  const [orientation, setOrientation] = React.useState("white");
+  const [boardSize, setBoardSize] = React.useState(
+    () => window.localStorage.getItem("boardSize") || 500
+  );
 
   const [activeSquare, setActiveSquare] = React.useState();
   const [hoverSquare, setHoverSquare] = React.useState();
@@ -163,14 +163,14 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
   const handleKeyDown = React.useCallback(
     (e) => {
       if (e.key === "x") {
-        if (settings.orientation === "white") {
-          setSettings({ ...settings, orientation: "black" });
+        if (orientation === "white") {
+          setOrientation("black");
         } else {
-          setSettings({ ...settings, orientation: "white" });
+          setOrientation("white");
         }
       }
     },
-    [settings]
+    [orientation]
   );
 
   const clickDefault = (e) => {
@@ -192,6 +192,10 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [handleDragStart, handleDrag, handleDragEnd, handleKeyDown]);
+
+  React.useEffect(() => {
+    window.localStorage.setItem("boardSize", boardSize);
+  }, [boardSize]);
 
   /* div constructors */
   /* ************ */
@@ -230,7 +234,8 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
   };
 
   const moveResize = (e) => {
-    setSettings({ ...settings, size: settings.size + (e.clientX - resizeX) });
+    console.log(parseInt(boardSize) + (e.clientX - resizeX));
+    setBoardSize(parseInt(boardSize) + (e.clientX - resizeX));
   };
 
   const stopResize = (e) => {
@@ -242,15 +247,13 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
   return (
     <div
       className={
-        settings.orientation === "white"
-          ? "board-layout"
-          : "flipped board-layout"
+        orientation === "white" ? "board-layout" : "flipped board-layout"
       }
     >
       <div
         className="board"
         id="board-board"
-        style={{ width: settings.size + "px", height: settings.size + "px" }}
+        style={{ width: boardSize + "px", height: boardSize + "px" }}
         ref={boardRef}
         onContextMenu={clickDefault}
       >
