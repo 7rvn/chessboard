@@ -32,13 +32,14 @@ function playSound(flag) {
   }
 }
 
-function getBoardPosition(e, board) {
+function getBoardPosition(e, board, orientation) {
+  const factor = orientation === "white" ? 0 : 7;
   const x = ((e.clientX - board.offsetLeft) / board.offsetWidth) * 800;
 
   const y = ((e.clientY - board.offsetTop) / board.offsetHeight) * 800;
 
-  const rank = Math.abs(~~(y / 100) - 7);
-  const file = ~~(x / 100);
+  const rank = Math.abs(~~(y / 100) - (7 - factor));
+  const file = Math.abs(~~(x / 100) - factor);
 
   return { x: x, y: y, rank: rank, file: file };
 }
@@ -90,7 +91,11 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
   const handleDragStart = React.useCallback(
     (e) => {
       if (e.button === 0) {
-        const { x, y, rank, file } = getBoardPosition(e, boardRef.current);
+        const { x, y, rank, file } = getBoardPosition(
+          e,
+          boardRef.current,
+          orientation
+        );
 
         if (position[rank.toString() + file.toString()]) {
           setLegalSquares(appHandleDragStart({ rank: rank, file: file }));
@@ -102,13 +107,17 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
         }
       }
     },
-    [appHandleDragStart, position]
+    [appHandleDragStart, position, orientation]
   );
 
   const handleDrag = React.useCallback(
     (e) => {
       if (activeSquare) {
-        const { x, y, rank, file } = getBoardPosition(e, boardRef.current);
+        const { x, y, rank, file } = getBoardPosition(
+          e,
+          boardRef.current,
+          orientation
+        );
 
         activeSquare.div.style.transform = `translate(${x - 50}%, ${y - 50}%)`;
 
@@ -121,12 +130,12 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
         }
       }
     },
-    [activeSquare, hoverSquare]
+    [activeSquare, hoverSquare, orientation]
   );
 
   const handleDragEnd = React.useCallback(
     (e) => {
-      const { rank, file } = getBoardPosition(e, boardRef.current);
+      const { rank, file } = getBoardPosition(e, boardRef.current, orientation);
 
       if (activeSquare) {
         setActiveSquare();
@@ -157,7 +166,7 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
       } else {
       }
     },
-    [activeSquare, clickHandler, setNewPosition]
+    [activeSquare, clickHandler, setNewPosition, orientation]
   );
 
   const handleKeyDown = React.useCallback(
