@@ -626,7 +626,7 @@ body {
 }
 
 .flipped .square-40 {
-  transform: translate(800%, 400%);
+  transform: translate(700%, 400%);
 }
 .flipped .square-41 {
   transform: translate(600%, 400%);
