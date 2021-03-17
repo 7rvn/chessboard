@@ -59,7 +59,6 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
     },
 
     orientation(newOrientation) {
-      console.log(newOrientation, "PLSS", newOrientation === orientation);
       if (newOrientation !== orientation) {
         setOrientation(newOrientation);
       }

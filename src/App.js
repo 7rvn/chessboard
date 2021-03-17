@@ -41,18 +41,37 @@ function App() {
 
   /* States */
   /* ************ */
-  const [state, setState] = React.useState({
-    game: new Chess(),
-    currentNode: constructPgnTree(pgns["e4e5"].data.default["pgn1"].pgn),
-  });
+  function getInitialState() {
+    const localStorage = JSON.parse(window.localStorage.getItem("settings"));
+    if (localStorage) {
+      return {
+        game: new Chess(),
+        currentNode: constructPgnTree(
+          pgns[localStorage.pgn].data.default[localStorage.key].pgn
+        ),
+        rootNode: constructPgnTree(
+          pgns[localStorage.pgn].data.default[localStorage.key].pgn
+        ),
+      };
+    } else {
+      return {
+        game: new Chess(),
+        currentNode: constructPgnTree(pgns["e4e5"].data.default["pgn1"].pgn),
+        rootNode: constructPgnTree(pgns["e4e5"].data.default["pgn1"].pgn),
+      };
+    }
+  }
+  const [state, setState] = React.useState(getInitialState);
 
-  const [settings, setSettings] = React.useState({
-    w: "user",
-    b: "computer",
-    rootNode: state.currentNode,
-    key: "pgn1",
-    pgn: "e4e5",
-  });
+  const [settings, setSettings] = React.useState(
+    () =>
+      JSON.parse(window.localStorage.getItem("settings")) || {
+        w: "user",
+        b: "computer",
+        key: "pgn1",
+        pgn: "e4e5",
+      }
+  );
 
   /* Refs & Derived State */
   /* ************ */
@@ -65,12 +84,11 @@ function App() {
   function changePgn(pgn, key) {
     sideboxRef.current.reset();
     let tree = constructPgnTree(pgns[pgn].data.default[key].pgn);
-    setState({ game: new Chess(), currentNode: tree });
+    setState({ game: new Chess(), currentNode: tree, rootNode: tree });
     setSettings({
       ...settings,
       w: pgns[pgn].w,
       b: pgns[pgn].b,
-      rootNode: tree,
       pgn: pgn,
       key: key,
     });
@@ -84,15 +102,20 @@ function App() {
     let style = "";
     while (node.nextMove) {
       let start = out.length ? "" : "(";
-      if (node === currentNode.nextMove) {
-        style = " next-move";
-      } else if (
-        node === currentNode.nextMove ||
-        currentNode.variation.includes(node)
+      if (
+        state.currentNode.nextMove &&
+        node.id === state.currentNode.nextMove.id
       ) {
         style = " next-move";
-      } else if (node === currentNode) {
+      } else if (node.id === state.currentNode.id) {
         style = " current-move";
+      } else if (state.currentNode.variation) {
+        const variationIds = state.currentNode.variation.map((x) => x.id);
+        if (variationIds.includes(node.id)) {
+          style = " next-move";
+        } else {
+          style = "";
+        }
       } else {
         style = "";
       }
@@ -142,25 +165,28 @@ function App() {
     return out;
   }
 
-  function goToNode(node, skipPc) {
-    sideboxRef.current.reset();
-    let path = [];
-    const endNode = node;
+  const goToNode = React.useCallback(
+    (node, skipPc) => {
+      sideboxRef.current.reset();
+      let path = [];
+      const endNode = node;
 
-    while (node.move) {
-      path.push(node.move);
-      node = node.parent;
-    }
-    let game = new Chess();
-    while (path.length) {
-      game.move(path.pop());
-    }
-    setState({ game: game, currentNode: endNode, skipPc: skipPc });
-  }
+      while (node.move) {
+        path.push(node.move);
+        node = node.parent;
+      }
+      let game = new Chess();
+      while (path.length) {
+        game.move(path.pop());
+      }
+      setState({ ...state, game: game, currentNode: endNode, skipPc: skipPc });
+    },
+    [state]
+  );
 
   function restartPgn() {
     sideboxRef.current.reset();
-    setState({ game: new Chess(), currentNode: settings.rootNode });
+    setState({ ...state, game: new Chess(), currentNode: state.rootNode });
   }
 
   /* Board Handler */
@@ -184,7 +210,7 @@ function App() {
         }
         let newGame = { ...state.game };
         newGame.move(move.san);
-        setState({ game: newGame, currentNode: node });
+        setState({ ...state, game: newGame, currentNode: node });
         return move;
       }
     }
@@ -208,7 +234,7 @@ function App() {
         }
       }
     },
-    [currentNode]
+    [currentNode, goToNode]
   );
 
   /* event listeners */
@@ -219,6 +245,11 @@ function App() {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [handleKeyDown]);
+
+  React.useEffect(() => {
+    window.localStorage.setItem("settings", JSON.stringify(settings));
+    boardRef.current.orientation(pgns[settings.pgn].orientation);
+  }, [settings]);
 
   /* Computer Moves */
   /* ************ */
@@ -249,13 +280,13 @@ function App() {
           let newGame = { ...state.game };
           newGame.move(move);
           boardRef.current.makeMove(move);
-          setState({ game: newGame, currentNode: node });
+          setState({ ...state, game: newGame, currentNode: node });
         }, 500);
       }
     }
   }, [state, settings, boardRef]);
 
-  const pgnview = constructPgnDivs(settings.rootNode);
+  const pgnview = constructPgnDivs(state.rootNode);
 
   return (
     <div id="main">
@@ -264,7 +295,7 @@ function App() {
           const [key, value] = entry;
 
           return (
-            <div className={"sidebar-group"}>
+            <div className={"sidebar-group"} key={key}>
               <div className={"sidebar-group-title"}>{value.title}</div>
               {Object.entries(value.data.default).map((e, index) => {
                 return (
@@ -296,7 +327,7 @@ function App() {
       <Sidebox
         ref={sideboxRef}
         pgnview={pgnview}
-        title={pgns[settings.pgn].title}
+        title={pgns[settings.pgn].data.default[settings.key].title}
         restartFunction={restartPgn}
       ></Sidebox>
     </div>
