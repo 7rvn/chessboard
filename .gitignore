@@ -26,6 +26,6 @@ notes.txt
 src/sounds/*
 src/img/*
 src/fonts/*
+src/pgns/*
 
 src/App-basic.js
-src/utils/data.json

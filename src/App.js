@@ -6,7 +6,25 @@ import Board from "./components/Board";
 import Sidebox from "./components/Sidebox";
 import { getMoveObj, hexToSan, isLegal, sanToHexTo } from "./utils/helper";
 import { constructPgnTree } from "./utils/pgnHelper";
-import * as data from "./utils/data.json";
+import * as e6b6Json from "./pgns/e6b6.json";
+import * as e4e5Json from "./pgns/e4e5.json";
+
+const pgns = {
+  e4e5: {
+    title: "e4e5 New York Style",
+    w: "user",
+    b: "computer",
+    orientation: "white",
+    data: e4e5Json,
+  },
+  e6b6: {
+    title: "e6b6 New York Style",
+    w: "computer",
+    b: "user",
+    orientation: "black",
+    data: e6b6Json,
+  },
+};
 
 function getGoodMoves(node) {
   const goodMoves = [node.nextMove];
@@ -25,15 +43,15 @@ function App() {
   /* ************ */
   const [state, setState] = React.useState({
     game: new Chess(),
-    currentNode: constructPgnTree(data.default.pgn1.pgn),
+    currentNode: constructPgnTree(pgns["e4e5"].data.default["pgn1"].pgn),
   });
 
   const [settings, setSettings] = React.useState({
     w: "user",
     b: "computer",
-    title: "1. e4 e5, Vienna Gambit",
     rootNode: state.currentNode,
-    pgn: "pgn1",
+    key: "pgn1",
+    pgn: "e4e5",
   });
 
   /* Refs & Derived State */
@@ -44,18 +62,19 @@ function App() {
 
   /* Sidebar */
   /* ************ */
-  function changePgn(pgn) {
+  function changePgn(pgn, key) {
     sideboxRef.current.reset();
-    let tree = constructPgnTree(data.default[pgn].pgn);
+    let tree = constructPgnTree(pgns[pgn].data.default[key].pgn);
     setState({ game: new Chess(), currentNode: tree });
     setSettings({
       ...settings,
-      w: "user",
-      b: "computer",
-      title: data.default[pgn].title,
+      w: pgns[pgn].w,
+      b: pgns[pgn].b,
       rootNode: tree,
       pgn: pgn,
+      key: key,
     });
+    boardRef.current.orientation(pgns[pgn].orientation);
   }
 
   /* Sidebox */
@@ -241,19 +260,28 @@ function App() {
   return (
     <div id="main">
       <div className={"sidebar"}>
-        {Object.entries(data.default).map((e, index) => {
+        {Object.entries(pgns).map((entry) => {
+          const [key, value] = entry;
+
           return (
-            <button
-              className={
-                settings.pgn === e[0]
-                  ? "sidebar-button active"
-                  : "sidebar-button"
-              }
-              onClick={() => changePgn(e[0])}
-              key={index}
-            >
-              {e[1].title}
-            </button>
+            <div className={"sidebar-group"}>
+              <div className={"sidebar-group-title"}>{value.title}</div>
+              {Object.entries(value.data.default).map((e, index) => {
+                return (
+                  <button
+                    className={
+                      settings.key === e[0] && settings.pgn === key
+                        ? "sidebar-button active"
+                        : "sidebar-button"
+                    }
+                    onClick={() => changePgn(key, e[0])}
+                    key={index + key}
+                  >
+                    {e[1].title}
+                  </button>
+                );
+              })}
+            </div>
           );
         })}
       </div>
@@ -268,7 +296,7 @@ function App() {
       <Sidebox
         ref={sideboxRef}
         pgnview={pgnview}
-        title={settings.title}
+        title={pgns[settings.pgn].title}
         restartFunction={restartPgn}
       ></Sidebox>
     </div>

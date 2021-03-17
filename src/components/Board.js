@@ -57,6 +57,13 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
     makeMove(move) {
       playSound(move.flags);
     },
+
+    orientation(newOrientation) {
+      console.log(newOrientation, "PLSS", newOrientation === orientation);
+      if (newOrientation !== orientation) {
+        setOrientation(newOrientation);
+      }
+    },
   }));
 
   /* States */
