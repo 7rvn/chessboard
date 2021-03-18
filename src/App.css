@@ -232,6 +232,7 @@ body {
   height: 12.5%;
   position: absolute;
   box-sizing: border-box;
+  z-index: 3;
 }
 
 .highlight {

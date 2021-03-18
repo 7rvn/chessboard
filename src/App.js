@@ -4,7 +4,7 @@ import Chess from "chess.js";
 
 import Board from "./components/Board";
 import Sidebox from "./components/Sidebox";
-import { getMoveObj, hexToSan, isLegal, sanToHexTo } from "./utils/helper";
+import { getMoveObj, hexToSan, isLegal, algToHex } from "./utils/helper";
 import { constructPgnTree } from "./utils/pgnHelper";
 import * as e6b6Json from "./pgns/e6b6.json";
 import * as e4e5Json from "./pgns/e4e5.json";
@@ -219,7 +219,7 @@ function App() {
   function handleDragStart({ rank, file }) {
     const san = hexToSan(rank, file);
     let legalMoves = state.game.moves({ square: san, verbose: true });
-    return sanToHexTo(legalMoves.map((x) => x.to));
+    return legalMoves.map((x) => [algToHex(x.to), x.flags]);
   }
 
   const handleKeyDown = React.useCallback(

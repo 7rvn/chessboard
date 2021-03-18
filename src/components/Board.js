@@ -224,6 +224,16 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
     );
   }
 
+  let activeSquareDiv;
+  if (activeSquare) {
+    activeSquareDiv = (
+      <div
+        className={`highlight square square-${activeSquare.hex.rank}${activeSquare.hex.file}`}
+        style={{ backgroundColor: "rgba(255, 255, 0, 0.5)" }}
+      ></div>
+    );
+  }
+
   let squareDivs = [];
   Object.entries(position).forEach((entry) => {
     let [square, piece] = entry;
@@ -274,13 +284,21 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
       >
         {squareDivs}
 
-        {legalSquares.map((square, index) => {
+        {legalSquares.map((square) => {
           return (
-            <div className={`${""}hint square square-${square}`} key={index} />
+            <div
+              className={`${
+                square[1].includes("c") || square[1].includes("e")
+                  ? "capture-"
+                  : ""
+              }hint square square-${square[0]}`}
+              key={square}
+            />
           );
         })}
 
         {hoverSquareDiv}
+        {activeSquareDiv}
       </div>
       <div className={"resizer"} onMouseDown={initResize}></div>
     </div>
