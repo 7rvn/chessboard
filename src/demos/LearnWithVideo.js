@@ -77,7 +77,9 @@ function App() {
       const node = goodMoves[Math.floor(Math.random() * goodMoves.length)];
 
       setTimeout(() => {
-        game.move(node.move);
+        const move = game.move(node.move);
+        move.flags = move.san.includes("+") ? move.flags + "+" : move.flags;
+        playSound(move.flags);
         setCurrentNode(node);
         setGame(game);
         boardRef.current.setBoard(game.board());
