@@ -19,7 +19,6 @@ function App() {
     boardRef.current.setBoard(newGame.board());
     if (move) {
       move.flags = move.san.includes("+") ? move.flags + "+" : move.flags;
-      console.log(move);
       playSound(move.flags);
       setGame(newGame);
     }
