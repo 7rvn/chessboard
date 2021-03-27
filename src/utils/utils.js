@@ -4,6 +4,18 @@ import castle from "../sounds/castle.webm";
 import capture from "../sounds/capture.webm";
 import moveCheck from "../sounds/move-check.webm";
 
+export function chessjsBoardToPositionObj(position) {
+  let positionObj = {};
+  position.forEach((rank, rankIndex) => {
+    rank.forEach((square, fileIndex) => {
+      positionObj[
+        Math.abs(rankIndex - 7).toString() + fileIndex.toString()
+      ] = square;
+    });
+  });
+  return positionObj;
+}
+
 export function playSound(flag) {
   if (flag.includes("p")) {
     new Audio(promote).play();

@@ -1,9 +1,3 @@
-@font-face {
-  font-family: "Montserrat";
-  src: local("Montserrat"),
-    url(./fonts/Montserrat/Montserrat-Medium.ttf) format("opentype");
-}
-
 .savediscolor {
   color: #7d7c7a;
 }
@@ -15,6 +9,8 @@ button {
 
 body {
   color: #fff;
+  margin: 0;
+  padding: 0;
 }
 
 #appgame {
