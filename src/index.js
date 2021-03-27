@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import App from "./demos/LegalMovesOnly";
+import App from "./demos/LearnWithVideo";
 
 ReactDOM.render(
   <React.StrictMode>

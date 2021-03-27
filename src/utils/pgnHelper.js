@@ -84,6 +84,16 @@ export function constructPgnTree(pgn) {
       }
     });
   });
-  //console.log(root);
+  // console.log(root);
   return root;
+}
+
+export function getGoodMoves(node) {
+  const goodMoves = [node.nextMove];
+  if (node.variation) {
+    node.variation.forEach((element) => {
+      goodMoves.push(element);
+    });
+  }
+  return goodMoves;
 }
