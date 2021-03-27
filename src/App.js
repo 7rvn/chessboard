@@ -194,7 +194,7 @@ function App() {
   function handleDrag({ from, to }) {
     if (!state.currentNode.nextMove) {
       sideboxRef.current.toggleAlert(true);
-      return;
+      return [null, null];
     }
     let fromSan = hexToSan(from.rank, from.file);
     let toSan = hexToSan(to.rank, to.file);
@@ -211,9 +211,12 @@ function App() {
         let newGame = { ...state.game };
         newGame.move(move.san);
         setState({ ...state, game: newGame, currentNode: node });
-        return move;
+        return [move, null];
+      } else {
+        return [move, "snap"];
       }
     }
+    return [null, null];
   }
 
   function handleDragStart({ rank, file }) {

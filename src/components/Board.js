@@ -1,11 +1,9 @@
 import * as React from "react";
 
-import moveSelf from "../sounds/move-self.webm";
-import promote from "../sounds/promote.webm";
-import castle from "../sounds/castle.webm";
-import capture from "../sounds/capture.webm";
-import moveCheck from "../sounds/move-check.webm";
+import { Square, playSound, pieces } from "../utils/utils";
 
+// converts chess.js board representation to
+// array with string keys of rank+file
 function constructPosition(position) {
   let positionObj = {};
   position.forEach((rank, rankIndex) => {
@@ -18,20 +16,8 @@ function constructPosition(position) {
   return positionObj;
 }
 
-function playSound(flag) {
-  if (flag.includes("p")) {
-    new Audio(promote).play();
-  } else if (flag.includes("+")) {
-    new Audio(moveCheck).play();
-  } else if (flag.includes("k") || flag.includes("q")) {
-    new Audio(castle).play();
-  } else if (flag.includes("c") || flag.includes("e")) {
-    new Audio(capture).play();
-  } else {
-    new Audio(moveSelf).play();
-  }
-}
-
+// returns x, y position of mouse inside board div
+// returns rank, file of mouse on the board
 function getBoardPosition(e, board, orientation) {
   const factor = orientation === "white" ? 0 : 7;
   const x = ((e.clientX - board.offsetLeft) / board.offsetWidth) * 800;
@@ -50,24 +36,31 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
   /* Ref functions*/
   /* ************ */
   React.useImperativeHandle(ref, () => ({
+    // sets position state
     setBoard(position) {
-      setposition(constructPosition(position));
+      setPosition(constructPosition(position));
     },
 
+    // makes move sound
     makeMove(move) {
       playSound(move.flags);
     },
 
+    // sets board orientation state
     orientation(newOrientation) {
       if (newOrientation !== orientation) {
         setOrientation(newOrientation);
       }
     },
+
+    snapback() {
+      console.log("takeitback");
+    },
   }));
 
   /* States */
   /* ************ */
-  const [position, setposition] = React.useState({});
+  const [position, setPosition] = React.useState({});
   const [orientation, setOrientation] = React.useState("white");
   const [boardSize, setBoardSize] = React.useState(
     () => window.localStorage.getItem("boardSize") || 500
@@ -76,9 +69,11 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
   const [activeSquare, setActiveSquare] = React.useState();
   const [hoverSquare, setHoverSquare] = React.useState();
   const [legalSquares, setLegalSquares] = React.useState([]);
+  const [highlightSquares, setHighlightSquare] = React.useState({});
 
   const boardRef = React.useRef();
 
+  // sets position state calcuted from move made
   const setNewPosition = React.useCallback(
     ({ from, to }) => {
       const fromString = from.rank.toString() + from.file.toString();
@@ -87,7 +82,7 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
 
       newPosition[fromString] = null;
       newPosition[toString] = position[fromString];
-      return newPosition;
+      setPosition(newPosition);
     },
     [position]
   );
@@ -148,7 +143,7 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
         activeSquare.div.removeAttribute("style");
         // if drag ended on different square from where it started
         if (activeSquare.hex.rank !== rank || activeSquare.hex.file !== file) {
-          let validMove = clickHandler({
+          let [validMove, moveAction] = clickHandler({
             from: activeSquare.hex,
             to: { rank: rank, file: file },
           });
@@ -159,20 +154,38 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
             return;
           }
 
+          if (moveAction) {
+            setHighlightSquare({
+              ...highlightSquares,
+              [activeSquare.hex.rank.toString() +
+              activeSquare.hex.file.toString()]: "wrong-move",
+              [rank.toString() + file.toString()]: "wrong-move",
+            });
+            setTimeout(function () {
+              setHighlightSquare({ ...highlightSquares });
+              setPosition(position);
+            }, 1500);
+          }
+
           playSound(validMove.flags);
 
-          setposition(
-            setNewPosition({
-              from: activeSquare.hex,
-              to: { rank: rank, file: file },
-            })
-          );
+          setNewPosition({
+            from: activeSquare.hex,
+            to: { rank: rank, file: file },
+          });
         }
         // if drag ended on start square handle it like a click
       } else {
       }
     },
-    [activeSquare, clickHandler, setNewPosition, orientation]
+    [
+      activeSquare,
+      clickHandler,
+      setNewPosition,
+      orientation,
+      position,
+      highlightSquares,
+    ]
   );
 
   const handleKeyDown = React.useCallback(
@@ -196,7 +209,7 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
   /* event listeners */
   /* ************ */
   React.useEffect(() => {
-    let b = boardRef.current;
+    const b = boardRef.current;
     b.addEventListener("mousedown", handleDragStart);
     b.addEventListener("mousemove", handleDrag);
     b.addEventListener("mouseup", handleDragEnd);
@@ -212,43 +225,6 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
   React.useEffect(() => {
     window.localStorage.setItem("boardSize", boardSize);
   }, [boardSize]);
-
-  /* div constructors */
-  /* ************ */
-  let hoverSquareDiv;
-  if (hoverSquare) {
-    hoverSquareDiv = (
-      <div
-        className={`hover-square square-${hoverSquare.rank}${hoverSquare.file}`}
-      ></div>
-    );
-  }
-
-  let activeSquareDiv;
-  if (activeSquare) {
-    activeSquareDiv = (
-      <div
-        className={`highlight square square-${activeSquare.hex.rank}${activeSquare.hex.file}`}
-        style={{ backgroundColor: "rgba(255, 255, 0, 0.5)" }}
-      ></div>
-    );
-  }
-
-  let squareDivs = [];
-  Object.entries(position).forEach((entry) => {
-    let [square, piece] = entry;
-
-    if (piece) {
-      squareDivs.push(
-        <div
-          className={`piece ${piece.color + piece.type} square square-${
-            square[0]
-          }${square[1]}`}
-          key={square}
-        />
-      );
-    }
-  });
 
   let resizeX;
 
@@ -282,23 +258,44 @@ const Board = React.forwardRef(({ clickHandler, appHandleDragStart }, ref) => {
         ref={boardRef}
         onContextMenu={clickDefault}
       >
-        {squareDivs}
+        {pieces(position)}
 
         {legalSquares.map((square) => {
           return (
-            <div
-              className={`${
+            <Square
+              type={
                 square[1].includes("c") || square[1].includes("e")
-                  ? "capture-"
-                  : ""
-              }hint square square-${square[0]}`}
+                  ? "capture-hint"
+                  : "hint"
+              }
+              square={square[0]}
               key={square}
             />
           );
         })}
 
-        {hoverSquareDiv}
-        {activeSquareDiv}
+        {hoverSquare ? (
+          <Square
+            type={"hover-square"}
+            square={hoverSquare.rank.toString() + hoverSquare.file.toString()}
+          ></Square>
+        ) : null}
+
+        {activeSquare ? (
+          <Square
+            type={"highlight"}
+            square={
+              activeSquare.hex.rank.toString() +
+              activeSquare.hex.file.toString()
+            }
+            style={{ backgroundColor: "rgba(255, 255, 0)" }}
+          ></Square>
+        ) : null}
+
+        {Object.entries(highlightSquares).map((entry) => {
+          let [square, flag] = entry;
+          return <Square type={"highlight " + flag} square={square}></Square>;
+        })}
       </div>
       <div className={"resizer"} onMouseDown={initResize}></div>
     </div>

@@ -237,6 +237,11 @@ body {
 
 .highlight {
   z-index: 2;
+  opacity: 0.5;
+}
+
+.wrong-move {
+  background-color: rgb(201, 52, 48);
 }
 
 .hint {
