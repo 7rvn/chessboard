@@ -46,9 +46,17 @@ function App() {
           type: "lastMove",
         });
       } else {
+        boardRef.current.addHighlights({
+          squares: [hexmove.from, hexmove.to],
+          type: "wrongMove",
+        });
         setTimeout(() => {
           game.undo();
           boardRef.current.setBoard(game.board());
+          boardRef.current.addHighlights({
+            squares: [],
+            type: "wrongMove",
+          });
         }, 777);
       }
     }

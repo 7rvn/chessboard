@@ -60,6 +60,8 @@ const Board = React.forwardRef(
           setLegalMoves(squares);
         } else if (type === "lastMove") {
           setLastMove(squares);
+        } else if (type === "wrongMove") {
+          setWrongMove(squares);
         }
       },
     }));
@@ -80,7 +82,8 @@ const Board = React.forwardRef(
     const [activeSquare, setActiveSquare] = React.useState();
     const [hoverSquare, setHoverSquare] = React.useState();
     const [legalMoves, setLegalMoves] = React.useState();
-    const [lastMove, setLastMove] = React.useState([]);
+    const [lastMove, setLastMove] = React.useState();
+    const [wrongMove, setWrongMove] = React.useState();
 
     const boardRef = React.useRef();
 
@@ -337,6 +340,16 @@ const Board = React.forwardRef(
                 square={square.rank.toString() + square.file.toString()}
                 key={square.rank.toString() + square.file.toString()}
                 style={{ backgroundColor: "rgb(255, 255, 0)" }}
+              ></Square>
+            );
+          })}
+
+          {wrongMove?.map((square) => {
+            return (
+              <Square
+                type={"wrong-move highlight"}
+                square={square.rank.toString() + square.file.toString()}
+                key={square.rank.toString() + square.file.toString()}
               ></Square>
             );
           })}
