@@ -8,6 +8,7 @@ import { constructPgnTree, getGoodMoves } from "../utils/pgnHelper";
 import { algToHex, hexToSan } from "../utils/helper";
 import Board from "../components/Board";
 import PgnViewer from "../components/PgnViewer";
+import Sidebar from "../components/Sidebar";
 import openings from "../pgns/youtube";
 
 function App() {
@@ -149,38 +150,46 @@ function App() {
   }, [game, opening, currentNode]);
 
   return (
-    <div id="main">
-      <div id="appgame">
-        <Board
-          ref={boardRef}
-          onMakeMove={handleMove}
-          onActivatePiece={handleActivatingPiece}
-          initialOrientation={opening.color}
-        ></Board>
-      </div>
-      <div>
-        <div className="flex-column">
-          <iframe
-            id="yt-player"
-            src={"https://www.youtube.com/embed/" + opening.youtube}
-            style={{ height: "35vh", width: "calc(35vh*(16/9))" }}
-            title="YouTube video player"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          ></iframe>
+    <div style={{ display: "flex", minWidth: "100vw" }}>
+      <Sidebar></Sidebar>
+      <div id="main">
+        <div id="appgame">
+          <Board
+            ref={boardRef}
+            onMakeMove={handleMove}
+            onActivatePiece={handleActivatingPiece}
+            initialOrientation={opening.color}
+          ></Board>
+        </div>
+
+        <div className="flex-column" id="sidebox">
+          <div id="video-container">
+            {/* <iframe
+              id="yt-player"
+              src={"https://www.youtube.com/embed/" + opening.youtube}
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe> */}
+          </div>
 
           <div id={"opening-title"}>{opening.title}</div>
+
+          <div id="sidebox-buttons">
+            <button class="action-button" onClick={restartLine}>
+              restart
+            </button>
+            <button class="action-button" onClick={togglePgn}>
+              {pgnVisible ? "hide PGN" : "show PGN"}
+            </button>
+          </div>
           <PgnViewer
             tree={currentNode}
             currentNode={currentNode}
             goToNode={goToNode}
             style={{ display: pgnVisible ? "block" : "none" }}
           ></PgnViewer>
-          <button onClick={restartLine}>restart</button>
-          <button onClick={togglePgn}>
-            {pgnVisible ? "hide PGN" : "show PGN"}
-          </button>
         </div>
       </div>
     </div>

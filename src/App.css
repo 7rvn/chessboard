@@ -9,6 +9,7 @@
 button {
   outline: none;
   cursor: pointer;
+  border: none;
 }
 
 body {
@@ -25,6 +26,7 @@ body {
 
 #main {
   display: flex;
+  width: 100%;
   background-color: #312e2b;
   justify-content: center;
   padding: 3rem 3rem 0 3rem;
@@ -67,7 +69,6 @@ body {
 
 .sidebar-button {
   background-color: #312e2b;
-  border: none;
   margin-bottom: 0.7rem;
   color: white;
   padding: 5px 32px;
@@ -228,6 +229,23 @@ body {
   top: -5.5%;
   width: 12.5%;
   z-index: 10;
+}
+
+.action-button {
+  display: inline-block;
+  width: fit-content;
+  background-color: #49a1b9;
+  border-radius: 0.5em;
+  border-color: #49a1b9;
+  color: #fff;
+  margin: 0.3em;
+  padding: 0.3em 1.5em;
+  font-size: 1em;
+  box-shadow: 0 0.2em 0 0 #167994;
+}
+
+.action-button:hover {
+  background-color: #7cbbcc;
 }
 
 .hide {
