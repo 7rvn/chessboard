@@ -163,7 +163,7 @@ function App() {
         </div>
 
         <div className="flex-column" id="sidebox">
-          <div id="video-container">
+          <div className="video-container" id={opening.thumbnail}>
             {/* <iframe
               id="yt-player"
               src={"https://www.youtube.com/embed/" + opening.youtube}

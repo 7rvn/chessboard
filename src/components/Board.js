@@ -1,5 +1,7 @@
 import * as React from "react";
 
+import "../css/board.css";
+
 import { Square, pieces, chessjsBoardToPositionObj } from "../utils/utils";
 import initialPositionObj from "../utils/initialPosition";
 

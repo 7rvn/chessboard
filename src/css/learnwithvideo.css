@@ -19,11 +19,28 @@
   margin-bottom: 1em;
 }
 
-#video-container {
+.video-container {
   width: calc(35vh * (16 / 9));
   height: 35vh;
-  background-image: url("../img/ytdefault.png");
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
+}
+
+#traxler {
+  background-image: url("../img/thumbnails/traxler.jpeg");
+}
+
+#trompowsky {
+  background-image: url("../img/thumbnails/trompowsky.jpeg");
+}
+#beefeater {
+  background-image: url("../img/thumbnails/beefeater.jpeg");
+}
+#winggambit {
+  background-image: url("../img/thumbnails/winggambit.jpeg");
+}
+
+#bdg {
+  background-image: url("../img/thumbnails/bdg.jpeg");
 }
