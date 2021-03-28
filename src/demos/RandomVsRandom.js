@@ -7,12 +7,10 @@ import Chess from "chess.js";
 
 import Board from "../components/Board";
 
-function App() {
+function RandomVsRandom() {
   /* States */
   /* ************ */
-  const [game, setGame] = React.useState(
-    new Chess("K1k5/P1Pp4/1p1P4/8/p2P4/P7/8/8 b - - 0 1")
-  );
+  const [game, setGame] = React.useState(new Chess());
 
   /* Refs & Derived State */
   /* ************ */
@@ -30,6 +28,7 @@ function App() {
         moves[Math.floor(Math.random() * moves.length)]
       );
       move.flags = move.san.includes("+") ? move.flags + "+" : move.flags;
+
       playSound(move.flags);
       boardRef.current.setBoard(newGame.board());
       setGame(newGame);
@@ -49,4 +48,4 @@ function App() {
   );
 }
 
-export default App;
+export default RandomVsRandom;

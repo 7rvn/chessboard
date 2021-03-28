@@ -1,0 +1,20 @@
+.openings-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  justify-content: center;
+}
+
+.opening {
+  cursor: pointer;
+  height: fit-content;
+  margin: 1rem 1rem;
+}
+
+.thumbnail {
+  width: 27vw;
+  height: calc(27vw / (16 / 9));
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}

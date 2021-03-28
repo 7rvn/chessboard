@@ -8,7 +8,7 @@ import Chess from "chess.js";
 
 import Board from "../components/Board";
 
-function App() {
+function LegalMovesOnly() {
   function handleMove(hexmove) {
     const newGame = { ...game };
     const move = newGame.move({
@@ -21,6 +21,11 @@ function App() {
       move.flags = move.san.includes("+") ? move.flags + "+" : move.flags;
       playSound(move.flags);
       setGame(newGame);
+
+      boardRef.current.addHighlights({
+        squares: [hexmove.from, hexmove.to],
+        type: "lastMove",
+      });
     }
   }
 
@@ -68,4 +73,4 @@ function App() {
   );
 }
 
-export default App;
+export default LegalMovesOnly;

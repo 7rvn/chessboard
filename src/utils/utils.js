@@ -1,8 +1,8 @@
-import moveSelf from "../sounds/move-self.webm";
-import promote from "../sounds/promote.webm";
-import castle from "../sounds/castle.webm";
-import capture from "../sounds/capture.webm";
-import moveCheck from "../sounds/move-check.webm";
+import moveSelf from "../assets/sound/move-self.mp3";
+import promote from "../assets/sound/promote.mp3";
+import castle from "../assets/sound/castle.mp3";
+import capture from "../assets/sound/capture.mp3";
+import moveCheck from "../assets/sound/move-check.mp3";
 
 export function chessjsBoardToPositionObj(position) {
   let positionObj = {};
