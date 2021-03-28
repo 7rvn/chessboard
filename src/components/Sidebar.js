@@ -6,7 +6,6 @@ function Sidebar() {
     <div id="sidebar">
       <div id="sidebar-icons">
         <div className="sidebar-icon" id="change-pgn" title="Change PGN"></div>
-        <div sidebar></div>
       </div>
     </div>
   );
