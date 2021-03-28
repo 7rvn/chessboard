@@ -1,7 +1,7 @@
-#pgn-viwer {
-  height: 100px;
+#pgn-viewer {
   width: 100%;
   background-color: #363636;
+  margin-bottom: 1rem;
 }
 
 .pgn-comment {

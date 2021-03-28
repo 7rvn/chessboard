@@ -1,7 +1,7 @@
 import * as React from "react";
 import "../css/pgnviewer.css";
 
-function PgnViewer({ tree, currentNode, goToNode }) {
+function PgnViewer({ tree, currentNode, goToNode, style }) {
   const [pgntree] = React.useState(tree);
   let out = [];
   function constructPgnDivs(node, layer = 0) {
@@ -46,6 +46,10 @@ function PgnViewer({ tree, currentNode, goToNode }) {
   }
 
   constructPgnDivs(pgntree);
-  return <div id="pgn-viwer">{out}</div>;
+  return (
+    <div id="pgn-viewer" style={style}>
+      {out}
+    </div>
+  );
 }
 export default PgnViewer;

@@ -11,13 +11,14 @@ import PgnViewer from "../components/PgnViewer";
 import openings from "../pgns/youtube";
 
 function App() {
-  const opening = openings["A45"];
+  const opening = openings["C57-Traxler"];
   /* States */
   /* ************ */
   const [game, setGame] = React.useState(new Chess());
   const [currentNode, setCurrentNode] = React.useState(
     constructPgnTree(opening.pgn)
   );
+  const [pgnVisible, setPgnVisible] = React.useState(true);
 
   /* Refs & Derived State */
   /* ************ */
@@ -104,6 +105,21 @@ function App() {
     boardRef.current.setBoard(newGame.board());
   }
 
+  function restartLine() {
+    let node = currentNode;
+    while (node.parent) {
+      node = node.parent;
+    }
+    setCurrentNode(node);
+    const newGame = new Chess();
+    setGame(newGame);
+    boardRef.current.setBoard(newGame.board());
+  }
+
+  function togglePgn() {
+    setPgnVisible(pgnVisible ? false : true);
+  }
+
   React.useEffect(() => {
     if (currentNode.nextMove === null) {
       return;
@@ -139,6 +155,7 @@ function App() {
           ref={boardRef}
           onMakeMove={handleMove}
           onActivatePiece={handleActivatingPiece}
+          initialOrientation={opening.color}
         ></Board>
       </div>
       <div>
@@ -158,7 +175,12 @@ function App() {
             tree={currentNode}
             currentNode={currentNode}
             goToNode={goToNode}
+            style={{ display: pgnVisible ? "block" : "none" }}
           ></PgnViewer>
+          <button onClick={restartLine}>restart</button>
+          <button onClick={togglePgn}>
+            {pgnVisible ? "hide PGN" : "show PGN"}
+          </button>
         </div>
       </div>
     </div>
