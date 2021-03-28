@@ -58,6 +58,8 @@ const Board = React.forwardRef(
       addHighlights({ squares, type }) {
         if (type === "legalMoves") {
           setLegalMoves(squares);
+        } else if (type === "lastMove") {
+          setLastMove(squares);
         }
       },
     }));
@@ -78,6 +80,7 @@ const Board = React.forwardRef(
     const [activeSquare, setActiveSquare] = React.useState();
     const [hoverSquare, setHoverSquare] = React.useState();
     const [legalMoves, setLegalMoves] = React.useState();
+    const [lastMove, setLastMove] = React.useState([]);
 
     const boardRef = React.useRef();
 
@@ -111,6 +114,7 @@ const Board = React.forwardRef(
             from: from,
             to: to,
           });
+          setLastMove([from, to]);
         }
 
         setActiveSquare();
@@ -312,7 +316,7 @@ const Board = React.forwardRef(
                 activeSquare.hex.rank.toString() +
                 activeSquare.hex.file.toString()
               }
-              style={{ backgroundColor: "rgba(255, 255, 0)" }}
+              style={{ backgroundColor: "rgb(255, 255, 0)" }}
             ></Square>
           ) : null}
 
@@ -322,6 +326,17 @@ const Board = React.forwardRef(
                 type={square.type}
                 square={square.rank.toString() + square.file.toString()}
                 key={square.rank.toString() + square.file.toString()}
+              ></Square>
+            );
+          })}
+
+          {lastMove?.map((square) => {
+            return (
+              <Square
+                type={"highlight"}
+                square={square.rank.toString() + square.file.toString()}
+                key={square.rank.toString() + square.file.toString()}
+                style={{ backgroundColor: "rgb(255, 255, 0)" }}
               ></Square>
             );
           })}

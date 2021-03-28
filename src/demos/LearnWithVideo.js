@@ -5,7 +5,7 @@ import Chess from "chess.js";
 
 import { playSound } from "../utils/utils";
 import { constructPgnTree, getGoodMoves } from "../utils/pgnHelper";
-import { hexToSan } from "../utils/helper";
+import { algToHex, hexToSan } from "../utils/helper";
 import Board from "../components/Board";
 import PgnViewer from "../components/PgnViewer";
 import openings from "../pgns/youtube";
@@ -40,6 +40,11 @@ function App() {
       if (moveRecommended) {
         setGame(game);
         setCurrentNode(node);
+
+        boardRef.current.addHighlights({
+          squares: [hexmove.from, hexmove.to],
+          type: "lastMove",
+        });
       } else {
         setTimeout(() => {
           game.undo();
@@ -47,6 +52,29 @@ function App() {
         }, 777);
       }
     }
+  }
+
+  function handleActivatingPiece({ rank, file }) {
+    const sanFrom = hexToSan(rank, file);
+    const isTurn = game.turn() === game.get(sanFrom)?.color;
+
+    if (!isTurn) {
+      return false;
+    }
+
+    const out = game.moves({ verbose: true, square: sanFrom }).map((m) => {
+      const hex = algToHex(m.to);
+      const type =
+        m.flags.includes("c") || m.flags.includes("e")
+          ? "capture-hint"
+          : "hint";
+      return { rank: hex[0], file: hex[1], type: type };
+    });
+
+    boardRef.current.addHighlights({
+      squares: out,
+      type: "legalMoves",
+    });
   }
 
   function goToNode(node) {
@@ -83,6 +111,15 @@ function App() {
         setCurrentNode(node);
         setGame(game);
         boardRef.current.setBoard(game.board());
+        const hexFrom = algToHex(move.from);
+        const hexTo = algToHex(move.to);
+        boardRef.current.addHighlights({
+          squares: [
+            { rank: hexFrom[0], file: hexFrom[1] },
+            { rank: hexTo[0], file: hexTo[1] },
+          ],
+          type: "lastMove",
+        });
       }, 777);
     }
   }, [game, opening, currentNode]);
@@ -90,7 +127,11 @@ function App() {
   return (
     <div id="main">
       <div id="appgame">
-        <Board ref={boardRef} onMakeMove={handleMove}></Board>
+        <Board
+          ref={boardRef}
+          onMakeMove={handleMove}
+          onActivatePiece={handleActivatingPiece}
+        ></Board>
       </div>
       <div>
         <div className="flex-column">
