@@ -12,12 +12,16 @@
 }
 
 .resizer {
-  width: 1.5rem;
-  height: 1.5rem;
+  margin-top: auto;
+  margin-bottom: 0.3rem;
+  margin-left: 0.3rem;
+  width: 1.2rem;
+  height: 1.2rem;
   filter: brightness(0) saturate(100%) invert(53%) sepia(3%) saturate(250%)
     hue-rotate(2deg) brightness(91%) contrast(86%);
-  cursor: nesw-resize;
+  cursor: nwse-resize;
   background-image: url("../img/resize.svg");
+  transform: rotateX(180deg);
 }
 
 .piece {
@@ -49,7 +53,7 @@
 }
 
 .wrong-move {
-  background-color: rgb(201, 52, 48);
+  opacity: 0.8;
 }
 
 .hint {

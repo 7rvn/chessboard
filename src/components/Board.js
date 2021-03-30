@@ -24,6 +24,11 @@ const Board = React.forwardRef(
       initialOrientation = "white",
       onMakeMove,
       onActivatePiece,
+      colors = {
+        darksquares: "#036016",
+        highlight: "#ebeb44",
+        wrong: "lightred",
+      },
     },
     ref
   ) => {
@@ -107,13 +112,45 @@ const Board = React.forwardRef(
       [position]
     );
 
+    const forceActivatePiece = React.useCallback(
+      (e) => {
+        const { x, y, rank, file } = getBoardPosition(
+          e,
+          boardRef.current,
+          orientation
+        );
+        e.target.style.transform = `translate(${x - 50}%, ${y - 50}%)`;
+        e.target.style.zIndex = 100;
+        e.target.style.cursor = "grabbing";
+        setActiveSquare({
+          div: e.target,
+          hex: { rank: rank, file: file },
+          clicked: false,
+          dragging: true,
+        });
+        setHoverSquare({ rank: rank, file: file });
+        if (onActivatePiece) {
+          onActivatePiece({ rank: rank, file: file });
+        }
+      },
+      [orientation, onActivatePiece]
+    );
+
     const makeMove = React.useCallback(
-      ({ from, to, animate = false }) => {
+      ({ from, to, animate = false, e }) => {
+        setLegalMoves();
+        setActiveSquare();
+
         if (onMakeMove) {
-          onMakeMove({
+          const oMMreturn = onMakeMove({
             from: from,
             to: to,
           });
+          if (oMMreturn === "samecolor") {
+            if (!activeSquare.dragging) {
+              forceActivatePiece(e);
+            }
+          }
         } else {
           updatePosition({
             from: from,
@@ -121,11 +158,8 @@ const Board = React.forwardRef(
           });
           setLastMove([from, to]);
         }
-
-        setActiveSquare();
-        setLegalMoves();
       },
-      [onMakeMove, updatePosition]
+      [onMakeMove, updatePosition, activeSquare, forceActivatePiece]
     );
 
     /* eventhandlers */
@@ -152,6 +186,7 @@ const Board = React.forwardRef(
               from: activeSquare.hex,
               to: { rank: rank, file: file },
               animate: true,
+              e: e,
             });
           }
 
@@ -229,6 +264,7 @@ const Board = React.forwardRef(
           makeMove({
             from: activeSquare.hex,
             to: { rank: rank, file: file },
+            e: e,
           });
         }
       },
@@ -289,7 +325,6 @@ const Board = React.forwardRef(
     const stopResize = (e) => {
       document.removeEventListener("mousemove", moveResize, false);
       document.removeEventListener("mouseup", stopResize, false);
-      console.log("done");
     };
 
     return (
@@ -301,7 +336,11 @@ const Board = React.forwardRef(
         <div
           className="board"
           id="board-board"
-          style={{ width: boardSize + "px", height: boardSize + "px" }}
+          style={{
+            width: boardSize + "px",
+            height: boardSize + "px",
+            backgroundColor: colors.darksquares,
+          }}
           ref={boardRef}
           onContextMenu={clickDefault}
         >
@@ -321,7 +360,7 @@ const Board = React.forwardRef(
                 activeSquare.hex.rank.toString() +
                 activeSquare.hex.file.toString()
               }
-              style={{ backgroundColor: "rgb(255, 255, 0)" }}
+              style={{ backgroundColor: colors.highlight }}
             ></Square>
           ) : null}
 
@@ -341,7 +380,7 @@ const Board = React.forwardRef(
                 type={"highlight"}
                 square={square.rank.toString() + square.file.toString()}
                 key={square.rank.toString() + square.file.toString()}
-                style={{ backgroundColor: "rgb(255, 255, 0)" }}
+                style={{ backgroundColor: colors.highlight }}
               ></Square>
             );
           })}
@@ -352,6 +391,7 @@ const Board = React.forwardRef(
                 type={"wrong-move highlight"}
                 square={square.rank.toString() + square.file.toString()}
                 key={square.rank.toString() + square.file.toString()}
+                style={{ backgroundColor: colors.wrong }}
               ></Square>
             );
           })}
