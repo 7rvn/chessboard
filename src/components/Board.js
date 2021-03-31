@@ -166,14 +166,12 @@ const Board = React.forwardRef(
     /* ************ */
     const handleMouseDown = React.useCallback(
       (e) => {
-        console.log(e);
         if (e.button === 0) {
           const { x, y, rank, file } = getBoardPosition(
             e,
             boardRef.current,
             orientation
           );
-          console.log(rank, file);
 
           const clicked =
             activeSquare?.hex.rank === rank && activeSquare?.hex.file === file
