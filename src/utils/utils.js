@@ -17,6 +17,9 @@ export function chessjsBoardToPositionObj(position) {
 }
 
 export function playSound(flag) {
+  if (window.matchMedia("(pointer: coarse)").matches) {
+    return;
+  }
   if (flag.includes("p")) {
     new Audio(promote).play();
   } else if (flag.includes("+")) {

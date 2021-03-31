@@ -7,9 +7,9 @@ import initialPositionObj from "../utils/initialPosition";
 
 function getBoardPosition(e, board, orientation) {
   const factor = orientation === "white" ? 0 : 7;
-  const x = ((e.clientX - board.offsetLeft) / board.offsetWidth) * 800;
+  const x = ((e.pageX - board.offsetLeft) / board.offsetWidth) * 800;
 
-  const y = ((e.clientY - board.offsetTop) / board.offsetHeight) * 800;
+  const y = ((e.pageY - board.offsetTop) / board.offsetHeight) * 800;
 
   const rank = Math.abs(~~(y / 100) - (7 - factor));
   const file = Math.abs(~~(x / 100) - factor);
@@ -166,12 +166,14 @@ const Board = React.forwardRef(
     /* ************ */
     const handleMouseDown = React.useCallback(
       (e) => {
+        console.log(e);
         if (e.button === 0) {
           const { x, y, rank, file } = getBoardPosition(
             e,
             boardRef.current,
             orientation
           );
+          console.log(rank, file);
 
           const clicked =
             activeSquare?.hex.rank === rank && activeSquare?.hex.file === file
@@ -296,6 +298,9 @@ const Board = React.forwardRef(
       b.addEventListener("mousedown", handleMouseDown);
       b.addEventListener("mousemove", handleMouseMove);
       b.addEventListener("mouseup", handleMouseUp);
+      b.addEventListener("touchmove", function (e) {
+        e.preventDefault();
+      });
       window.addEventListener("keydown", handleKeyDown);
       return () => {
         b.removeEventListener("mousedown", handleMouseDown);
